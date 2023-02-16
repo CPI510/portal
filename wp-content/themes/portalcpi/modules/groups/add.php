@@ -56,14 +56,42 @@ global $wpdb;
                     </div>
                 <?php endif; ?>
 
+                <?php if($_GET['program_id_f'] == 18): ?>
+                    <div class="form-group">
+                        <label for="regular13" class="col-sm-2 control-label">Тип оценивания</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" name="program_assessment" id="program_assessment" data-user  required>
+                                <option selected value="1">Основное</option>
+                                <option value="2">Повторное</option>
+                            </select>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+
                 <div class="form-group">
                     <label for="regular13" class="col-sm-2 control-label">Номер группы</label>
                     <div class="col-sm-10">
-                        <input type="text" data-user name="number_group" class="form-control" required><div class="form-control-line"></div>
+                        <input id="number_group" type="text" data-user name="number_group" class="form-control" required><div class="form-control-line"></div>
                     </div>
                 </div>
 
                 <input type="hidden" data-user name="program_id" value="<?= $_GET['program_id_f'] ?>">
+
+                <?php if($_GET['program_id_f'] == 18): ?>
+                    <div class="form-group">
+                        <label for="regular13" class="col-sm-2 control-label">Предмет</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" name="subject_id" data-user >
+                                <option></option>
+                                <?php $subjects = $wpdb->get_results("SELECT * FROM p_subject"); ?>
+                                <?php foreach ($subjects as $sbj):?>
+                                    <option value="<?= $sbj->id ?>"><?= $sbj->name ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
                 <div class="form-group">
                     <label for="password13" class="col-sm-2 control-label">Центр обучения</label>
@@ -155,6 +183,41 @@ global $wpdb;
                         </select>
                     </div>
                 </div>
+
+                <!--Наблюдатель-->
+                <?php if($_GET['program_id_f'] == 18): ?>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="Firstname5" class="col-sm-4 control-label">Наблюдатель</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control select2-list" name="observer_id" data-user  required>
+                                        <option value="0">-=Нет наблюдателя=-</option>
+                                        <?php $results = $wpdb->get_results("SELECT `user_id`, `surname`, `name`, `patronymic` FROM p_user_fields WHERE `access` = '7' OR `user_id` = '349' ORDER BY `surname`  ASC, `name` ASC, `patronymic` ASC;;") ?>
+                                        <?php foreach ($results as $value):?>
+                                            <option value="<?= $value->user_id ?>"><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <div class="form-control-line"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="Lastname5" class="col-sm-4 control-label">Дата завершения (для наблюдателя)</label>
+                                <div class="col-sm-8">
+                                    <div class="input-group date" id="datetimepickerobserver">
+                                        <input value="<?= $result->observer_date ?>" type="text" name="observer_date" data-user class="form-control" autocomplete="off" >
+                                        <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
 
                 <?php if($_GET['program_id_f'] == 7 || $_GET['program_id_f'] == 6 || $_GET['program_id_f'] == 16): //Для директоров свои поля и для ЭО ЛУШ ЛУПС ?>
 

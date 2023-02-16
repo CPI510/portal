@@ -12,33 +12,33 @@ $_POST = json_decode(file_get_contents("php://input"), true);
 
 if(!is_user_logged_in()) {
 
-	//auth_redirect();
+    //auth_redirect();
     //wp_redirect( site_url() . "/login/" );
     sessionexpired();
-	
-}else{
-	if($_POST['statement'] === "1"){
-		$user_id = wp_create_user( $_POST['u_email'], $_POST['u_pass'], $_POST['u_email'] );
-	
-		if ( is_wp_error( $user_id ) ) {
-			if( $user_id->get_error_message() === 'Извините, это имя пользователя уже существует!') $errorText = "Извините, этот Email уже существует!"; 
-			else $errorText = $user_id->get_error_message();
-			alertStatus('danger', "{$errorText}");
-		}
-		else { //Добавление пользователя
 
-			$usercreate = $wpdb->query($wpdb->prepare( "INSERT INTO p_user_fields ( `user_id`,`surname`, `name`, `patronymic`, `iin`, `tel`, `email`, `access`, `date_create` ) 
+}else{
+    if($_POST['statement'] === "1"){
+        $user_id = wp_create_user( $_POST['u_email'], $_POST['u_pass'], $_POST['u_email'] );
+
+        if ( is_wp_error( $user_id ) ) {
+            if( $user_id->get_error_message() === 'Извините, это имя пользователя уже существует!') $errorText = "Извините, этот Email уже существует!";
+            else $errorText = $user_id->get_error_message();
+            alertStatus('danger', "{$errorText}");
+        }
+        else { //Добавление пользователя
+
+            $usercreate = $wpdb->query($wpdb->prepare( "INSERT INTO p_user_fields ( `user_id`,`surname`, `name`, `patronymic`, `iin`, `tel`, `email`, `access`, `date_create` ) 
 				VALUES (%d, %s, %s, %s, %s, %s, %s, %s, %s)"
-				,$user_id
-				,$_POST['u_surname']
-				,$_POST['u_name']
-				,$_POST['u_patronymic']
-				,$_POST['u_iin']
-				,$_POST['u_tel']
-				,$_POST['u_email']
-				,$_POST['u_access']
+                ,$user_id
+                ,$_POST['u_surname']
+                ,$_POST['u_name']
+                ,$_POST['u_patronymic']
+                ,$_POST['u_iin']
+                ,$_POST['u_tel']
+                ,$_POST['u_email']
+                ,$_POST['u_access']
                 ,dateTime()
-			));
+            ));
             if($usercreate && isset($_POST['subject']) && isset($_POST['region'])){
                 $insertData = $wpdb->query($wpdb->prepare( "INSERT INTO p_user_fields_listeners ( `user_id`, `group_id`, `subject_id`, `region_id`, `datetime_create` ) 
 			    VALUES (%d, %d, %d, %d, %s)"
@@ -63,12 +63,12 @@ if(!is_user_logged_in()) {
 
 
             //$mail = mailVeryficationMeta($user_id);
-			//echo'<meta http-equiv="refresh" content="0;url=/members/?z=list" />'; exit();
-		   if($usercreate) alertStatus('success',"Пользователь <b>{$_POST['u_surname']} {$_POST['u_name']} {$_POST['u_patronymic']}</b> добавлен!");
-		}
-	}elseif($_POST['statement'] === "2"){ //printAll($_POST); exit(); //Обновление пользователя
+            //echo'<meta http-equiv="refresh" content="0;url=/members/?z=list" />'; exit();
+            if($usercreate) alertStatus('success',"Пользователь <b>{$_POST['u_surname']} {$_POST['u_name']} {$_POST['u_patronymic']}</b> добавлен!");
+        }
+    }elseif($_POST['statement'] === "2"){ //printAll($_POST); exit(); //Обновление пользователя
         //printALL($_POST); exit();
-	    if(!preg_match('/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]{8,}$/', $_POST['u_pass']) && $_POST['u_pass'] != ""){
+        if(!preg_match('/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]{8,}$/', $_POST['u_pass']) && $_POST['u_pass'] != ""){
             alertStatus('danger', "Требование к паролю: Минимум 8 символов, одна цифра, одна буква в верхнем регистре и одна в нижнем");
         }else{
             $user_id = wp_update_user( [
@@ -145,20 +145,27 @@ if(!is_user_logged_in()) {
             }
         }
 
-	}elseif($_POST['statement'] === "3"){ // Создание группы
-		$results = $wpdb->get_row($wpdb->prepare("SELECT id FROM p_groups WHERE number_group = %s;",$_POST['number_group'] ));
-        if($results) alertStatus('danger', "Такая группа есть в системе!");
-		else{
+    }elseif($_POST['statement'] === "3"){ // Создание группы
 
-            $program_subsection = (isset($_POST['program_subsection'])) ? $_POST['program_subsection'] : "0"; //Для 6 программы ЭО ЛУПС ЛУШ
+        //Проверка на Повторников и выдача им навзания группы
+        if (($_POST['number_group']) == "-") { $_POST['number_group'] = setRepeatersGroupName(); }
+
+        $results = $wpdb->get_row($wpdb->prepare("SELECT id FROM p_groups WHERE number_group = %s;",$_POST['number_group'] ));
+        if($results) alertStatus('danger', "Такая группа есть в системе!");
+        else{
+
+            $program_subsection = (isset($_POST['program_subsection'])) ? $_POST['program_subsection'] : "0";   //Для 6 программы ЭО ЛУПС ЛУШ
             $independent_trainer_date = (isset($_POST['independent_trainer_date'])) ? $_POST['independent_trainer_date'] : "0"; //
+            $program_assessment = (isset($_POST['program_assessment'])) ? $_POST['program_assessment'] : "0";       //Для программ 18 Фокусы
+            $observer_date = (isset($_POST['$observer_date'])) ? $_POST['observer_date'] : "0";
+
 
             if( ( ($_POST['expert_id'] != 0 && $_POST['moderator_id'] != 0)
-                || ($_POST['expert_id'] != 0 && $_POST['teamleader_id'] != 0)
-                || ($_POST['moderator_id'] != 0 && $_POST['teamleader_id'] != 0) )
+                    || ($_POST['expert_id'] != 0 && $_POST['teamleader_id'] != 0)
+                    || ($_POST['moderator_id'] != 0 && $_POST['teamleader_id'] != 0) )
                 && ( ($_POST['expert_id'] == $_POST['moderator_id'])
-                || ($_POST['expert_id'] == $_POST['teamleader_id'])
-                || ($_POST['moderator_id'] == $_POST['teamleader_id']) )
+                    || ($_POST['expert_id'] == $_POST['teamleader_id'])
+                    || ($_POST['moderator_id'] == $_POST['teamleader_id']) )
             )
             {
                 if($_POST['expert_id'] == $_POST['moderator_id']) $text = "Модератора и Эксперта";
@@ -169,8 +176,8 @@ if(!is_user_logged_in()) {
             }else{
                 $groupcreate = $wpdb->query($s=$wpdb->prepare( "INSERT INTO p_groups ( 
 `number_group`, `program_id`, `training_center`, `trener_id`, `trener_date`, `start_date`, `end_date`, `lang_id`, `expert_id`, 
-`moderator_id`, `teamleader_id`, `admin_id`, `potok`, `expert_date`,`moderator_date`,`teamleader_date`,`independent_trainer_id`,`independent_trainer_date`, `program_subsection` ) 
-				VALUES (%s, %d, %d, %d, %s, %s, %s, %d, %d, %d, %d, %d, %d, %s, %s, %s, %d, %s, %d)"
+`moderator_id`, `teamleader_id`, `admin_id`, `potok`, `expert_date`,`moderator_date`,`teamleader_date`,`independent_trainer_id`,`independent_trainer_date`, `program_subsection`, `program_assessment`, `observer_id`, `observer_date`, `subject_id`) 
+				VALUES (%s, %d, %d, %d, %s, %s, %s, %d, %d, %d, %d, %d, %d, %s, %s, %s, %d, %s, %d, %d, %d, %s, %d)"
                     ,$_POST['number_group']
                     ,$_POST['program_id']
                     ,$_POST['p_training_center']
@@ -190,14 +197,18 @@ if(!is_user_logged_in()) {
                     ,$_POST['independent_trainer_id']
                     ,$independent_trainer_date
                     ,$program_subsection
+                    ,$program_assessment
+                    ,$_POST['observer_id']
+                    ,$_POST['observer_date']
+                    ,$_POST['subject_id']
                 )); //echo $s;
                 if($groupcreate){
                     alertStatus('success',"Группа: <b>{$_POST['number_group']}</b> была создана! <p><a href='/groups/?z=add' class='btn btn-info'>Добавить новую группу</a></p>");
                 }
             }
 
-		}
-	}elseif($_POST['statement'] === "4"){ // Редактирование группы
+        }
+    }elseif($_POST['statement'] === "4"){ // Редактирование группы
 
         $program_subsection = (isset($_POST['program_subsection'])) ? $_POST['program_subsection'] : "0"; //Для 6 программы ЭО ЛУПС ЛУШ
 
@@ -208,44 +219,46 @@ if(!is_user_logged_in()) {
                 || ($_POST['expert_id'] == $_POST['teamleader_id'])
                 || ($_POST['moderator_id'] == $_POST['teamleader_id']) )
         )
-    {
-        if($_POST['expert_id'] == $_POST['moderator_id']) $text = "Модератора и Эксперта";
-        if($_POST['expert_id'] == $_POST['teamleader_id']) $text = "Эксперта и Тимлидера";
-        if($_POST['moderator_id'] == $_POST['teamleader_id']) $text = "Модератора и Тимлидера";
-        if( ($_POST['expert_id'] == $_POST['moderator_id']) && ( $_POST['moderator_id'] == $_POST['teamleader_id']) ) $text = "Эксперта и Модератора и Тимлидера";
-        alertStatus('warning', "Один струдник ЦПИ выбран в качестве $text");
-    }else{
-        $groupupdate = $wpdb->query($s=$wpdb->prepare( "UPDATE p_groups set `number_group` = %s, `program_id` = %d, `training_center` = %d, `trener_id` = %d, `trener_date` = %s, `start_date` = %s, 
-`end_date` = %s, `active` = %s, `lang_id` = %d, `expert_id` = %d, `moderator_id` = %d, `teamleader_id` = %d, `potok` = %d, `expert_date` = %s, `moderator_date` = %s, `teamleader_date` = %s , `independent_trainer_id` = %d, `independent_trainer_date` = %s, `program_subsection` = %d 
+        {
+            if($_POST['expert_id'] == $_POST['moderator_id']) $text = "Модератора и Эксперта";
+            if($_POST['expert_id'] == $_POST['teamleader_id']) $text = "Эксперта и Тимлидера";
+            if($_POST['moderator_id'] == $_POST['teamleader_id']) $text = "Модератора и Тимлидера";
+            if( ($_POST['expert_id'] == $_POST['moderator_id']) && ( $_POST['moderator_id'] == $_POST['teamleader_id']) ) $text = "Эксперта и Модератора и Тимлидера";
+            alertStatus('warning', "Один струдник ЦПИ выбран в качестве $text");
+        }else{
+            $groupupdate = $wpdb->query($s=$wpdb->prepare( "UPDATE p_groups set `number_group` = %s, `program_id` = %d, `training_center` = %d, `trener_id` = %d, `trener_date` = %s, `start_date` = %s, 
+`end_date` = %s, `active` = %s, `lang_id` = %d, `expert_id` = %d, `moderator_id` = %d, `teamleader_id` = %d, `potok` = %d, `expert_date` = %s, `moderator_date` = %s, `teamleader_date` = %s , `independent_trainer_id` = %d, `independent_trainer_date` = %s, `program_subsection` = %d, `observer_id` = %d, `observer_date` = %s
 		WHERE id = %d"
-            ,$_POST['number_group']
-            ,$_POST['program_id']
-            ,$_POST['p_training_center']
-            ,$_POST['trener']
-            ,$_POST['trener_date']
-            ,$_POST['start_date']
-            ,$_POST['end_date']
-            ,$_POST['active']
-            ,$_POST['lang_id']
-            ,$_POST['expert_id'] //expert_id
-            ,$_POST['moderator_id'] //moderator_id
-            ,$_POST['teamleader_id'] // teamleader_id
-            ,$_POST['potok']
-            ,$_POST['expert_date']
-            ,$_POST['moderator_date']
-            ,$_POST['teamleader_date']
-            ,$_POST['independent_trainer_id']
-            ,$_POST['independent_trainer_date']
-            ,$program_subsection
-            ,$_POST['id'] // id
-        ));
-        $wpdb->last_error;
-        if($groupupdate) alertStatus('success',"Группа: <b>{$_POST['number_group']}</b> была изменена!");
-    }
+                ,$_POST['number_group']
+                ,$_POST['program_id']
+                ,$_POST['p_training_center']
+                ,$_POST['trener']
+                ,$_POST['trener_date']
+                ,$_POST['start_date']
+                ,$_POST['end_date']
+                ,$_POST['active']
+                ,$_POST['lang_id']
+                ,$_POST['expert_id'] //expert_id
+                ,$_POST['moderator_id'] //moderator_id
+                ,$_POST['teamleader_id'] // teamleader_id
+                ,$_POST['potok']
+                ,$_POST['expert_date']
+                ,$_POST['moderator_date']
+                ,$_POST['teamleader_date']
+                ,$_POST['independent_trainer_id']
+                ,$_POST['independent_trainer_date']
+                ,$program_subsection
+                ,$_POST['observer_id']
+                ,$_POST['observer_date']
+                ,$_POST['id'] // id
+            ));
+            $wpdb->last_error;
+            if($groupupdate) alertStatus('success',"Группа: <b>{$_POST['number_group']}</b> была изменена!");
+        }
 
 
 
-	}elseif(isset($_GET['list_file_group_id'])){
+    }elseif(isset($_GET['list_file_group_id'])){
         $name_var = translateDir($_GET['list_file_group_id']);
         $access = getAccess(get_current_user_id())->access;
         //printAll($_POST); exit();
@@ -315,38 +328,38 @@ if(!is_user_logged_in()) {
 
         <div class="card">
 
-        <div class="card-body">
-        <?php $results = $wpdb->get_results($s=$wpdb->prepare("SELECT a.id, a.datecreate, a.filename, a.filedir, a.filesize, b.name folder_name, c.start_date, c.end_date
+            <div class="card-body">
+                <?php $results = $wpdb->get_results($s=$wpdb->prepare("SELECT a.id, a.datecreate, a.filename, a.filedir, a.filesize, b.name folder_name, c.start_date, c.end_date
                         FROM p_file a
                         LEFT OUTER JOIN p_folder b ON b.id = a.folder
                         LEFT OUTER JOIN p_groups c ON c.id = a.group_id
                         WHERE a.group_id = %d AND a.user_id = %d AND a.portfolio = 1 ORDER BY b.sort_field",$_GET['portfolio_list'], $_POST['fileuserdata'] ));
-        ?>
-        <table class="table no-margin table-hover" id="dataFile">
-            <tbody>
-            <tr>
-                <th><?= DIR_NAME ?></th>
-                <th><?= FILE_NAME ?></th>
-                <th><?= FILE_SIZE ?></th>
-                <th><?= DOWNLOADED_TIME ?></th>
-                <th></th>
-            </tr>
-                <?php foreach($results as $res):?>
+                ?>
+                <table class="table no-margin table-hover" id="dataFile">
+                    <tbody>
                     <tr>
-                        <td><?= $res->folder_name ?>/Портфолио</td>
-                        <td><a href="/server_file/?download=<?= $res->id ?>&uid=<?= $_POST['fileuserdata'] ?>" class="text-primary"><?= $res->filename ?></a></td>
-                        <td><?= formatSizeUnits($res->filesize) ?></td>
-                        <td><?= $res->datecreate ?></td>
-                        </td>
+                        <th><?= DIR_NAME ?></th>
+                        <th><?= FILE_NAME ?></th>
+                        <th><?= FILE_SIZE ?></th>
+                        <th><?= DOWNLOADED_TIME ?></th>
+                        <th></th>
                     </tr>
-                <?php endforeach;?>
-            </tbody>
-        </table>
-        </div>
+                    <?php foreach($results as $res):?>
+                        <tr>
+                            <td><?= $res->folder_name ?>/Портфолио</td>
+                            <td><a href="/server_file/?download=<?= $res->id ?>&uid=<?= $_POST['fileuserdata'] ?>" class="text-primary"><?= $res->filename ?></a></td>
+                            <td><?= formatSizeUnits($res->filesize) ?></td>
+                            <td><?= $res->datecreate ?></td>
+                            </td>
+                        </tr>
+                    <?php endforeach;?>
+                    </tbody>
+                </table>
+            </div>
 
         </div>
         <?php
     }elseif($_GET['d']){
-	    echo "test d";
+        echo "test d";
     }
 }

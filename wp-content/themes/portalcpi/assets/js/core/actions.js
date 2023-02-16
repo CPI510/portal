@@ -10,6 +10,9 @@
 		  boxdiv = document.querySelector('.box'),
           alertDanger = document.querySelector('.alert-danger');
 
+          program_assessment_select = document.querySelector('#program_assessment')
+          number_group_input = document.querySelector('#number_group')
+
 	const message = {
           loading: `${document.location.origin}/wp-content/themes/portalcpi/assets/img/spinner.svg`,
           success: "Спасибо, все данные внесены",
@@ -28,11 +31,21 @@
         })
     }
 
+    // Если выбрали повторное оценивание, ввод строки недоступен
+    if (program_assessment_select){
+        program_assessment_select.addEventListener('change', function() {
+            let value = program_assessment_select.options[program_assessment_select.selectedIndex].value;
+            number_group_input.style.display = (value == 2) ? "none":"" ;
+            number_group_input.value = (value == 2) ? "-":"" ;
+        })
+    }
+
+
 
 	const statusMessage = document.createElement('div');
-	
+
 	statusMessage.classList.add('status');
-		  
+
     boxdiv.append(statusMessage);
 
 	formreg.addEventListener('submit', saveData);
@@ -57,7 +70,7 @@
 
         request.setRequestHeader('Content-type', 'application/json');
         const json = JSON.stringify(allData);
-
+        console.log(json);
         request.send(json);
 
         const spinner = document.createElement('img');
@@ -86,5 +99,5 @@
         });
     }
 
-	
+
 

@@ -3,8 +3,10 @@ global $wpdb;
 ?>
 
 <?php $result = $wpdb->get_row($wpdb->prepare( "SELECT `id`, `lang_id`, `date_create`, `number_group`, `program_id`, `start_date`, `end_date`, `trener_id`, `trener_date`,
-`training_center`, `active`, `moderator_id`, `expert_id`, `teamleader_id`, `admin_id`, `potok`, `expert_date`, `moderator_date`, `teamleader_date`, `independent_trainer_id`, `independent_trainer_date`, `program_subsection`  
+`training_center`, `active`, `moderator_id`, `expert_id`, `teamleader_id`, `admin_id`, `potok`, `expert_date`, `moderator_date`, `teamleader_date`, `independent_trainer_id`, `independent_trainer_date`, `program_subsection`, `program_assessment`, `observer_id`, `observer_date`
 FROM p_groups WHERE id = %d", $_GET['id'])); ?>
+
+
 
 <?php if($result): ?>
     <div class="row">
@@ -85,45 +87,45 @@ FROM p_groups WHERE id = %d", $_GET['id'])); ?>
                 </div>
 
 
-                    <!-- тренер-->
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="Firstname5" class="col-sm-4 control-label">Тренер</label>
-                                <div class="col-sm-8">
-                                    <select class="form-control select2-list" name="trener" data-user  required>
-                                        <option value="0">-=Нет тренера=-</option>
-                                        <?php $results = $wpdb->get_results("SELECT `user_id`, `surname`, `name`, `patronymic` FROM p_user_fields WHERE `access` = '4';") ?>
-                                        <?php foreach ($results as $value):?>
-                                            <?php if($result->trener_id == $value->user_id): ?>
-                                                <option value="<?= $value->user_id ?>" selected><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
-                                            <?php else: ?>
-                                                <option value="<?= $value->user_id ?>"><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
-                                            <?php endif; ?>
+                <!-- тренер-->
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="Firstname5" class="col-sm-4 control-label">Тренер</label>
+                            <div class="col-sm-8">
+                                <select class="form-control select2-list" name="trener" data-user  required>
+                                    <option value="0">-=Нет тренера=-</option>
+                                    <?php $results = $wpdb->get_results("SELECT `user_id`, `surname`, `name`, `patronymic` FROM p_user_fields WHERE `access` = '4';") ?>
+                                    <?php foreach ($results as $value):?>
+                                        <?php if($result->trener_id == $value->user_id): ?>
+                                            <option value="<?= $value->user_id ?>" selected><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
+                                        <?php else: ?>
+                                            <option value="<?= $value->user_id ?>"><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
+                                        <?php endif; ?>
 
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <div class="form-control-line"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="Lastname5" class="col-sm-4 control-label">Дата завершения (для тренера)</label>
-                                <div class="col-sm-8">
-                                    <div class="input-group date" id="datetimepickertrener">
-                                        <input value="<?= $result->trener_date ?>" type="text" name="trener_date" data-user class="form-control" autocomplete="off" >
-                                        <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                                    </div>
-                                    <div class="form-control-line"></div>
-                                </div>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="form-control-line"></div>
                             </div>
                         </div>
                     </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="Lastname5" class="col-sm-4 control-label">Дата завершения (для тренера)</label>
+                            <div class="col-sm-8">
+                                <div class="input-group date" id="datetimepickertrener">
+                                    <input value="<?= $result->trener_date ?>" type="text" name="trener_date" data-user class="form-control" autocomplete="off" >
+                                    <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                                </div>
+                                <div class="form-control-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                
+
 
 
 
@@ -337,94 +339,18 @@ FROM p_groups WHERE id = %d", $_GET['id'])); ?>
                     </div>
 
                 <?php else: ?>
-                <?php if($result->program_id != 15): //Для Оценивание портфолио тренеров по образовательной программе курсов повышения квалификации «Инновационный менеджмент в управлении школой» свои поля ?>
-                    <!--Эксперт-->
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="Firstname5" class="col-sm-4 control-label">Эксперт</label>
-                                <div class="col-sm-8">
-                                    <select class="form-control select2-list" name="expert_id" data-user  required>
-                                        <option value="0">-=Нет эксперта=-</option>
-                                        <?php $results = $wpdb->get_results("SELECT `user_id`, `surname`, `name`, `patronymic` FROM p_user_fields WHERE `access` = '7' OR `user_id` = '349' ORDER BY `surname`  ASC, `name` ASC, `patronymic` ASC;") ?>
-                                        <?php foreach ($results as $value):?>
-                                            <?php if($result->expert_id == $value->user_id): ?>
-                                                <option value="<?= $value->user_id ?>" selected><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
-                                            <?php else: ?>
-                                                <option value="<?= $value->user_id ?>"><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
-                                            <?php endif; ?>
-
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <div class="form-control-line"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="Lastname5" class="col-sm-4 control-label">Дата завершения (для эксперта)</label>
-                                <div class="col-sm-8">
-                                    <div class="input-group date" id="datetimepickerexpert">
-                                        <input value="<?= $result->expert_date ?>" type="text" name="expert_date" data-user class="form-control" autocomplete="off" >
-                                        <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!--Модератор-->
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="Firstname5" class="col-sm-4 control-label">Модератор</label>
-                                <div class="col-sm-8">
-                                    <select class="form-control select2-list" name="moderator_id" data-user  required>
-                                        <option value="0">-=Нет модератора=-</option>
-                                        <?php $results = $wpdb->get_results("SELECT `user_id`, `surname`, `name`, `patronymic` FROM p_user_fields WHERE `access` = '7';") ?>
-                                        <?php foreach ($results as $value):?>
-                                            <?php if($result->moderator_id == $value->user_id): ?>
-                                                <option value="<?= $value->user_id ?>" selected><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
-                                            <?php else: ?>
-                                                <option value="<?= $value->user_id ?>"><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
-                                            <?php endif; ?>
-
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <div class="form-control-line"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="Lastname5" class="col-sm-4 control-label">Дата завершения (для модератора)</label>
-                                <div class="col-sm-8">
-                                    <div class="input-group date" id="datetimepickermoderator">
-                                        <input value="<?= $result->moderator_date ?>" type="text" name="moderator_date" data-user class="form-control" autocomplete="off" >
-                                        <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                                    </div>
-                                    <div class="form-control-line"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <?php if($result->program_id == 14): ?>
-                        <!--Независимый тренер становиться модератором 2 для программы 14-->
+                    <?php if($result->program_id != 15): //Для Оценивание портфолио тренеров по образовательной программе курсов повышения квалификации «Инновационный менеджмент в управлении школой» свои поля ?>
+                        <!--Наблюдатель-->
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label for="Firstname5" class="col-sm-4 control-label">Наблюдатель</label>
                                     <div class="col-sm-8">
-                                        <select class="form-control select2-list" name="independent_trainer_id" data-user  required>
-                                            <option value="0">-=Не выбран=-</option>
-                                            <?php $results = $wpdb->get_results("SELECT `user_id`, `surname`, `name`, `patronymic` FROM p_user_fields WHERE `access` = '4';") ?>
+                                        <select class="form-control select2-list" name="observer_id" data-user  required>
+                                            <option value="0">-=Нет Наблюдателя=-</option>
+                                            <?php $results = $wpdb->get_results("SELECT `user_id`, `surname`, `name`, `patronymic` FROM p_user_fields WHERE `access` = '7' OR `user_id` = '349' ORDER BY `surname`  ASC, `name` ASC, `patronymic` ASC;") ?>
                                             <?php foreach ($results as $value):?>
-                                                <?php if($result->independent_trainer_id == $value->user_id): ?>
+                                                <?php if($result->observer_id == $value->user_id): ?>
                                                     <option value="<?= $value->user_id ?>" selected><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
                                                 <?php else: ?>
                                                     <option value="<?= $value->user_id ?>"><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
@@ -438,10 +364,84 @@ FROM p_groups WHERE id = %d", $_GET['id'])); ?>
                             </div>
                             <div class="col-sm-6">
                                 <div class="form-group">
-                                    <label for="Lastname5" class="col-sm-4 control-label">Дата завершения (для модератора 2)</label>
+                                    <label for="Lastname5" class="col-sm-4 control-label">Дата завершения (для наблюдателя)</label>
                                     <div class="col-sm-8">
-                                        <div class="input-group date" id="datetimepickerindependenttrainer">
-                                            <input value="<?= $result->independent_trainer_date ?>" type="text" name="independent_trainer_date" data-user class="form-control" autocomplete="off" >
+                                        <div class="input-group date" id="datetimepickerobserver">
+                                            <input value="<?= $result->observer_date ?>" type="text" name="observer_date" data-user class="form-control" autocomplete="off" >
+                                            <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Эксперт-->
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="Firstname5" class="col-sm-4 control-label">Эксперт</label>
+                                    <div class="col-sm-8">
+                                        <select class="form-control select2-list" name="expert_id" data-user  required>
+                                            <option value="0">-=Нет эксперта=-</option>
+                                            <?php $results = $wpdb->get_results("SELECT `user_id`, `surname`, `name`, `patronymic` FROM p_user_fields WHERE `access` = '7' OR `user_id` = '349' ORDER BY `surname`  ASC, `name` ASC, `patronymic` ASC;") ?>
+                                            <?php foreach ($results as $value):?>
+                                                <?php if($result->expert_id == $value->user_id): ?>
+                                                    <option value="<?= $value->user_id ?>" selected><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
+                                                <?php else: ?>
+                                                    <option value="<?= $value->user_id ?>"><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
+                                                <?php endif; ?>
+
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <div class="form-control-line"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="Lastname5" class="col-sm-4 control-label">Дата завершения (для эксперта)</label>
+                                    <div class="col-sm-8">
+                                        <div class="input-group date" id="datetimepickerexpert">
+                                            <input value="<?= $result->expert_date ?>" type="text" name="expert_date" data-user class="form-control" autocomplete="off" >
+                                            <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Модератор-->
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="Firstname5" class="col-sm-4 control-label">Модератор</label>
+                                    <div class="col-sm-8">
+                                        <select class="form-control select2-list" name="moderator_id" data-user  required>
+                                            <option value="0">-=Нет модератора=-</option>
+                                            <?php $results = $wpdb->get_results("SELECT `user_id`, `surname`, `name`, `patronymic` FROM p_user_fields WHERE `access` = '7';") ?>
+                                            <?php foreach ($results as $value):?>
+                                                <?php if($result->moderator_id == $value->user_id): ?>
+                                                    <option value="<?= $value->user_id ?>" selected><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
+                                                <?php else: ?>
+                                                    <option value="<?= $value->user_id ?>"><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
+                                                <?php endif; ?>
+
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <div class="form-control-line"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="Lastname5" class="col-sm-4 control-label">Дата завершения (для модератора)</label>
+                                    <div class="col-sm-8">
+                                        <div class="input-group date" id="datetimepickermoderator">
+                                            <input value="<?= $result->moderator_date ?>" type="text" name="moderator_date" data-user class="form-control" autocomplete="off" >
                                             <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
                                 </span>
@@ -451,46 +451,85 @@ FROM p_groups WHERE id = %d", $_GET['id'])); ?>
                                 </div>
                             </div>
                         </div>
-                    <?php endif; ?>
 
-                    <!--Тимлидер-->
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="Firstname5" class="col-sm-4 control-label">Тимлидер</label>
-                                <div class="col-sm-8">
-                                    <select class="form-control select2-list" name="teamleader_id" data-user  required>
-                                        <option value="0">-=Нет тимлидера=-</option>
-                                        <?php $results = $wpdb->get_results("SELECT `user_id`, `surname`, `name`, `patronymic` FROM p_user_fields WHERE `access` = '7';") ?>
-                                        <?php foreach ($results as $value):?>
-                                            <?php if($result->teamleader_id == $value->user_id): ?>
-                                                <option value="<?= $value->user_id ?>" selected><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
-                                            <?php else: ?>
-                                                <option value="<?= $value->user_id ?>"><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
-                                            <?php endif; ?>
+                        <?php if($result->program_id == 14): ?>
+                            <!--Независимый тренер становиться модератором 2 для программы 14-->
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="Firstname5" class="col-sm-4 control-label">Наблюдатель</label>
+                                        <div class="col-sm-8">
+                                            <select class="form-control select2-list" name="independent_trainer_id" data-user  required>
+                                                <option value="0">-=Не выбран=-</option>
+                                                <?php $results = $wpdb->get_results("SELECT `user_id`, `surname`, `name`, `patronymic` FROM p_user_fields WHERE `access` = '4';") ?>
+                                                <?php foreach ($results as $value):?>
+                                                    <?php if($result->independent_trainer_id == $value->user_id): ?>
+                                                        <option value="<?= $value->user_id ?>" selected><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
+                                                    <?php else: ?>
+                                                        <option value="<?= $value->user_id ?>"><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
+                                                    <?php endif; ?>
 
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <div class="form-control-line"></div>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <div class="form-control-line"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="Lastname5" class="col-sm-4 control-label">Дата завершения (для тимлидера)</label>
-                                <div class="col-sm-8">
-                                    <div class="input-group date" id="datetimepickerteamleader">
-                                        <input value="<?= $result->teamleader_date ?>" type="text" name="teamleader_date" data-user class="form-control" autocomplete="off" >
-                                        <span class="input-group-addon">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="Lastname5" class="col-sm-4 control-label">Дата завершения (для модератора 2)</label>
+                                        <div class="col-sm-8">
+                                            <div class="input-group date" id="datetimepickerindependenttrainer">
+                                                <input value="<?= $result->independent_trainer_date ?>" type="text" name="independent_trainer_date" data-user class="form-control" autocomplete="off" >
+                                                <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
                                 </span>
+                                            </div>
+                                            <div class="form-control-line"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <!--Тимлидер-->
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="Firstname5" class="col-sm-4 control-label">Тимлидер</label>
+                                    <div class="col-sm-8">
+                                        <select class="form-control select2-list" name="teamleader_id" data-user  required>
+                                            <option value="0">-=Нет тимлидера=-</option>
+                                            <?php $results = $wpdb->get_results("SELECT `user_id`, `surname`, `name`, `patronymic` FROM p_user_fields WHERE `access` = '7';") ?>
+                                            <?php foreach ($results as $value):?>
+                                                <?php if($result->teamleader_id == $value->user_id): ?>
+                                                    <option value="<?= $value->user_id ?>" selected><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
+                                                <?php else: ?>
+                                                    <option value="<?= $value->user_id ?>"><?= $value->surname ?> <?= $value->name ?> <?= $value->patronymic ?></option>
+                                                <?php endif; ?>
+
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <div class="form-control-line"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="Lastname5" class="col-sm-4 control-label">Дата завершения (для тимлидера)</label>
+                                    <div class="col-sm-8">
+                                        <div class="input-group date" id="datetimepickerteamleader">
+                                            <input value="<?= $result->teamleader_date ?>" type="text" name="teamleader_date" data-user class="form-control" autocomplete="off" >
+                                            <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                <?php endif; ?>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <div class="form-group">

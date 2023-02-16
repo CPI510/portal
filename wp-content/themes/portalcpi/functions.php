@@ -762,3 +762,9 @@ function authAnoher($id){
     }
 
 }
+
+function setRepeatersGroupName(){
+    global $wpdb;
+    $counter = $wpdb->get_var("SELECT COUNT(`program_assessment`) FROM p_groups WHERE `program_assessment` = 2");
+    return "Повторное оценивание " . ($counter +1);
+}

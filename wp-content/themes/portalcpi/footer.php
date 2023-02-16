@@ -184,8 +184,9 @@
 		<h2>
             <?php
             global  $wpdb;
-            $ResultsTr = groupInfo($_GET['id']);
+
             printAll("Test");
+
 
 
 
@@ -230,6 +231,12 @@
                 });
                 $(document).ready(function () {
                     $("#datetimepicker2").on("dp.show", function (e) {
+                        $('.OK').html("Готово");
+                    });
+                });
+
+                $(document).ready(function () {
+                    $("#datetimepickerobserver").on("dp.show", function (e) {
                         $('.OK').html("Готово");
                     });
                 });
@@ -290,6 +297,21 @@
                         });
                         $('#datetimepicker2 > input').click(function(){
                             $('#datetimepicker2 .input-group-addon').trigger('click');
+                        })
+                    });
+
+                    $(function () {
+                        $('#datetimepickerobserver').datetimepicker({
+                            format: 'YYYY-MM-DD H:mm',
+                            locale: 'ru',
+                            showClose: true,
+                            icons: {
+                                close: 'OK'
+                            }
+
+                        });
+                        $('#datetimepickerobserver > input').click(function(){
+                            $('#datetimepickerobserver .input-group-addon').trigger('click');
                         })
                     });
 
