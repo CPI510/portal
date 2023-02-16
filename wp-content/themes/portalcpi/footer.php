@@ -185,8 +185,7 @@
             <?php
             global  $wpdb;
             $ResultsTr = groupInfo($_GET['id']);
-            echo "Testing" ;
-            //printAll($ResultsTr);
+            printAll("Test");
 
 
 
