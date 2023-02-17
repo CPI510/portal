@@ -54,6 +54,7 @@
                 const display<?= $q ?> = document.querySelector('#display<?= $q ?>');
                 countDown('<?= $time_end ?>', display<?= $q ?>);
             </script>
+
         </div>
     </div>
 </div>

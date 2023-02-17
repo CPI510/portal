@@ -169,7 +169,8 @@ foreach ($linksGroup as $link) {
                 <?php endif; ?>
 
                 <?php if ($ResultsTr->program_id == 18): ?>
-                        <a href="/assessment/?z=sheet<?= ($ResultsTr->program_id == 18) ? $ResultsTr->program_id : "" ?>&group=<?= $_GET['id'] ?>" class="btn btn-success">Проформа</a>
+                        <a href="/proforma/?form=<?= $ResultsTr->proforma_id ?>&group=<?= $_GET['id'] ?>" class="btn btn-success">Проформа</a>
+<!--                        <a href="/assessment/?z=sheet--><?php //= ($ResultsTr->program_id == 18) ? $ResultsTr->program_id : "" ?><!--&group=--><?php //= $_GET['id'] ?><!--" class="btn btn-success">Проформа</a>-->
                 <?php endif; ?>
 
                 <?php elseif (getAccess(get_current_user_id())->access == 1 || getAccess(get_current_user_id())->access == 7 && $ResultsTr->program_id != 14 && $ResultsTr->program_id != 6 && $ResultsTr->program_id != 16): ?>

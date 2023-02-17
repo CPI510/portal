@@ -184,13 +184,9 @@
 		<h2>
             <?php
             global  $wpdb;
-//            $res = groupInfo($_GET['id']);
-//            printAll($res);
-            $results = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, p.start_date, p.end_date, u.surname, u.name, u.patronymic, u.email
-                                FROM p_groups_users g
-                                LEFT OUTER JOIN p_groups p ON p.id = g.id_group
-                                LEFT OUTER JOIN p_user_fields u ON u.user_id = g.id_user WHERE g.id_group = %d ORDER BY u.surname, u.name, u.patronymic", $_GET['id'] ));
-            printAll($results);
+             $ResultsTr = groupInfo($_GET['id']);
+
+            printAll($ResultsTr);
 
 
 
