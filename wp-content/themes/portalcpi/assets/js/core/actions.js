@@ -70,7 +70,6 @@
 
         request.setRequestHeader('Content-type', 'application/json');
         const json = JSON.stringify(allData);
-        console.log(json);
         request.send(json);
 
         const spinner = document.createElement('img');

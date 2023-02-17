@@ -78,6 +78,7 @@ foreach ($linksGroup as $link) {
     if ($link->info == 'for_moderator_id') $for_moderator_id = $link->link;
     if ($link->info == 'for_trener_p14') $for_trener_p14 = $link->link;
     if ($link->info == 'for_other_p14') $for_other_p14 = $link->link;
+    if ($link->info == 'for_employees_p18') $for_employees_p18 = $link->link;
 }
 ?>
 <input type="hidden" name="" id="kz" value="<?= LANGID ?>">
@@ -145,6 +146,7 @@ foreach ($linksGroup as $link) {
                 <?php if($ResultsTr->program_id == 17):  ?>
                     <a href="/assessment/?z=sheet<?= $ResultsTr->program_id ?>&group=<?= $_GET['id'] ?>" class="btn btn-success">Проформа</a>
                 <?php endif; ?>
+
                 <?php if(
                         $ResultsTr->program_id == 7
                         || ($ResultsTr->program_id == 6 || $ResultsTr->program_id == 16) && (
@@ -155,8 +157,21 @@ foreach ($linksGroup as $link) {
                         $ResultsTr->teamleader_id != get_current_user_id()
                             && $ResultsTr->moderator_id != get_current_user_id()
                             && $ResultsTr->independent_trainer_id != get_current_user_id() )
+
+                        || ($ResultsTr->program_id == 18 && (
+                        $ResultsTr->teamleader_id != get_current_user_id()
+                            && $ResultsTr->moderator_id != get_current_user_id()
+                            && $ResultsTr->independent_trainer_id != get_current_user_id()  ))
+
                     ) ): ?>
+                <?php if ($ResultsTr->program_id == 14 || $ResultsTr->program_id == 6 || $ResultsTr->program_id == 16): ?>
                     <a href="/assessment/?z=sheet<?= ($ResultsTr->program_id == 14 || $ResultsTr->program_id == 6 || $ResultsTr->program_id == 16) ? $ResultsTr->program_id : "" ?>&group=<?= $_GET['id'] ?>" class="btn btn-success"><?= LIST_ASSESMENT_NAME ?></a>
+                <?php endif; ?>
+
+                <?php if ($ResultsTr->program_id == 18): ?>
+                        <a href="/assessment/?z=sheet<?= ($ResultsTr->program_id == 18) ? $ResultsTr->program_id : "" ?>&group=<?= $_GET['id'] ?>" class="btn btn-success">Проформа</a>
+                <?php endif; ?>
+
                 <?php elseif (getAccess(get_current_user_id())->access == 1 || getAccess(get_current_user_id())->access == 7 && $ResultsTr->program_id != 14 && $ResultsTr->program_id != 6 && $ResultsTr->program_id != 16): ?>
 
                     <?php if($ResultsTr->proforma_id == 0): ?>
@@ -291,6 +306,45 @@ foreach ($linksGroup as $link) {
                 </div>
             <?php endif; ?>
 
+            <?php if($ResultsTr->program_id == 18): ?>
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <?php
+                            //printAll($_POST);
+                            if(isset($_POST['enter_links'])){
+
+                                if(isset($_POST['for_employees_p18']) ){
+                                    $sql = "INSERT INTO p_assessment_coding_group (group_id,create_user_id,for_user_id,link,info) VALUES (%d,%d,0,%s,%s) ON DUPLICATE KEY UPDATE link = %s";
+                                    $sql = $wpdb->prepare($sql,$_GET['id'],get_current_user_id(),$_POST['for_employees_p18'],'for_employees_p18',$_POST['for_employees_p18']);
+                                    $wpdb->query($sql);
+                                }else{
+                                    alertStatus('warning','Ошибка',true);
+                                }
+                                echo'<meta http-equiv="refresh" content="0;url=/groups/?z=group&id=' . $_GET['id'] .'" />';
+                            }
+
+                            ?>
+                            <form method="post">
+                                <div class="card-head collapsed" data-toggle="collapse" data-parent="#accordion1" data-target="#accordion1-1" aria-expanded="false">
+                                    <span class="btn btn-default btn-xs">Ссылка</span>
+                                    <div class="tools">
+                                        <a class="btn btn-icon-toggle"><i class="fa fa-angle-up"></i></a>
+                                    </div>
+                                </div>
+                                <div id="accordion1-1" class="collapse" aria-expanded="false" style="height: 0px;">
+                                    <div class="form-group">
+                                        <label for="textarea3">Ссылка на файлы</label>
+                                        <input type="text" name="for_employees_p18" class="form-control"  required="" value="<?= $for_employees_p18 ?>" placeholder="Не заполнено">
+                                    </div>
+                                    <input type="submit" name="enter_links" value="Сохранить" class="btn btn-info">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
         <?php endif; ?>
 
         <div class="col-lg-12">
@@ -303,6 +357,8 @@ foreach ($linksGroup as $link) {
                         echo "<h3> ".PLAGIAT_LINK." : <a href='{$for_trener_p14}' class='text-primary' target='_blank'>" . $for_trener_p14 . "</a></h3>";
                     if (  $ResultsTr->program_id == 17 && $ResultsTr->trener_id == get_current_user_id())
                         echo "<h3> Ссылка на OneDrive : <a href='{$for_trener_p14}' class='text-primary' target='_blank'>" . $for_trener_p14 . "</a></h3>";
+
+
                     if ( ($ResultsTr->program_id == 14) && (
                         $ResultsTr->moderator_id == get_current_user_id()
                         || $ResultsTr->independent_trainer_id == get_current_user_id()
@@ -316,6 +372,14 @@ foreach ($linksGroup as $link) {
                             || $ResultsTr->expert_id == get_current_user_id()
                             || $ResultsTr->teamleader_id == get_current_user_id()
                         )) echo "<h3>Ссылка на OneDrive: <a href='{$for_other_p14}' class='text-primary' target='_blank'>" . $for_other_p14 . "</a></h3>";
+                    if ( ($ResultsTr->program_id == 18) && (
+                            $ResultsTr->trener_id == get_current_user_id()
+                            || $ResultsTr->moderator_id == get_current_user_id()
+                            || $ResultsTr->independent_trainer_id == get_current_user_id()
+                            || $ResultsTr->teamleader_id == get_current_user_id()
+                            || $ResultsTr->expert_id == get_current_user_id()
+                            || $ResultsTr->teamleader_id == get_current_user_id()
+                        )) echo "<h3> Ссылка на OneDrive : <a href='{$for_employees_p18}' class='text-primary' target='_blank'>" . $for_employees_p18 . "</a></h3>";
                     ?>
 
                     <?php
@@ -345,8 +409,9 @@ foreach ($linksGroup as $link) {
                             </thead>
                             <tbody>
                             <?php
+                            //TODO Данный блок показывает кому открыввется доступ для последующей проверки
                             $rubric_name = ASSESSMENT_SECOND[2];
-                            if($ResultsTr->moderator_id == get_current_user_id() && ($ResultsTr->program_id == 14 )){ //если модератор выводим только тех у кого эксперт поставил 4(неудовлетварительно)
+                            if($ResultsTr->moderator_id == get_current_user_id() && ($ResultsTr->program_id == 14 || $ResultsTr->program_id == 18)){ //если модератор выводим только тех у кого эксперт поставил 4(неудовлетварительно)
                                 $results = $wpdb->get_results($s=$wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, p.start_date, p.end_date, u.surname, u.name, u.patronymic, u.email, r.grading_solution
                                 FROM p_groups_users g
                                 LEFT OUTER JOIN p_assessment_rubric r ON r.listener_id = g.id_user AND r.group_id = %d AND r.create_user_id = %d 
@@ -383,7 +448,7 @@ foreach ($linksGroup as $link) {
                                 LEFT OUTER JOIN p_groups p ON p.id = g.id_group
                                 LEFT OUTER JOIN p_user_fields u ON u.user_id = g.id_user WHERE g.id_group = %d ORDER BY u.surname, u.name, u.patronymic", $_GET['id'] ));
 
-                            }elseif($ResultsTr->teamleader_id == get_current_user_id() && ($ResultsTr->program_id == 14 || $ResultsTr->program_id == 17)){
+                            }elseif($ResultsTr->teamleader_id == get_current_user_id() && ($ResultsTr->program_id == 14 || $ResultsTr->program_id == 17 || $ResultsTr->program_id == 18)){
                                 /*Тимлидер видит слушателей получивших неудовлетворительно, видит лист оценивания и рубрики Эксперта Модератора и Тренера,
                             выбирает оценку и рубрику либо эксперта либо модератора либо Модератора 2(если такой был) далее может изменять рубрику дописывать что то*/
                                 $results = $wpdb->get_results($s=$wpdb->prepare("SELECT a.id, p.start_date, p.end_date, 
@@ -429,6 +494,7 @@ foreach ($linksGroup as $link) {
 
                             //if(!$results) echo'<meta http-equiv="refresh" content="0;url=/groups/?z=list" />';
                             ?>
+
                             <?php foreach($results as $res): ?>
                                 <?php
                                 if( $code = $wpdb->get_row($wpdb->prepare("SELECT code, linktext FROM p_assessment_coding_user WHERE group_id = %d AND listener_id = %d", $_GET['id'], $res->id_user)) ) $codetext = $code->code;
@@ -496,7 +562,7 @@ foreach ($linksGroup as $link) {
                                                 Код
                                             </a>';
                                     }
-                                } elseif ( $ResultsTr->program_id == 14 || $ResultsTr->program_id == 17 || $ResultsTr->program_id == 6  ) // ОТОБРАЖЕНИЕ ВСЕХ РУБРИК ДЛЯ ПРОГРАММЫ
+                                } elseif ( $ResultsTr->program_id == 14 || $ResultsTr->program_id == 17 || $ResultsTr->program_id == 6 || $ResultsTr->program_id == 18 ) // ОТОБРАЖЕНИЕ ВСЕХ РУБРИК ДЛЯ ПРОГРАММЫ
                                 {
                                     $resRubricsql = "SELECT * FROM p_assessment_rubric WHERE group_id = %d AND create_user_id = %d AND listener_id = %d";
                                     $res->surname;

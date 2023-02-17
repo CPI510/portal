@@ -107,7 +107,7 @@ function groupInfo($id) {
 u.name, u.patronymic, t.name name_org, t.name_kaz name_org_kaz, g.trener_id, g.trener_date, g.admin_id, g.potok, g.expert_date, g.moderator_date, g.teamleader_date, g.independent_trainer_id, g.independent_trainer_date, g.lang_id
 , e.surname expert_surname, e.name expert_name, e.patronymic expert_patronymic
 , m.surname moderator_surname, m.name moderator_name, m.patronymic moderator_patronymic
-, tm.surname teamleader_surname, tm.name teamleader_name, tm.patronymic teamleader_patronymic, p.single_file, p.name_kaz, g.deleted, g.active, g.program_subsection, p.mail_confirmation
+, tm.surname teamleader_surname, tm.name teamleader_name, tm.patronymic teamleader_patronymic, p.single_file, p.name_kaz, g.deleted, g.active, g.program_subsection, p.mail_confirmation,g.observer_id, g.observer_date, g.program_assessment, g.subject_id, sb.name subject
     FROM p_groups g
     LEFT OUTER JOIN p_programs p ON p.id = g.program_id 
     LEFT OUTER JOIN p_lang l ON l.id = g.lang_id 
@@ -116,6 +116,7 @@ u.name, u.patronymic, t.name name_org, t.name_kaz name_org_kaz, g.trener_id, g.t
     LEFT OUTER JOIN p_user_fields e ON e.user_id = g.expert_id
     LEFT OUTER JOIN p_user_fields m ON m.user_id = g.moderator_id
     LEFT OUTER JOIN p_user_fields tm ON tm.user_id = g.teamleader_id
+    LEFT OUTER JOIN p_subject sb ON sb.id = g.subject_id
     WHERE g.id = %d", $id));
 }
 
