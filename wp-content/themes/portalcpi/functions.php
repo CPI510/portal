@@ -769,3 +769,9 @@ function setRepeatersGroupName(){
     $counter = $wpdb->get_var("SELECT COUNT(`program_assessment`) FROM p_groups WHERE `program_assessment` = 2");
     return "Повторное оценивание " . ($counter +1);
 }
+
+function getDecisionById($id){
+    global $wpdb;
+    $result = $wpdb->get_row("SELECT `decision` from p_proforma_user_result WHERE `user_id` = $id");
+    return $result->decision;
+}

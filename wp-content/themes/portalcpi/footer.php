@@ -183,10 +183,9 @@
 					
 		<h2>
             <?php
-            global  $wpdb;
-             $ResultsTr = groupInfo($_GET['id']);
 
-            printAll($ResultsTr);
+
+
 
 
 
