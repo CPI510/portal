@@ -482,15 +482,26 @@ foreach ($linksGroup as $link) {
 //                                foreach ($results2 as $res){
 //                                    $results[] = $res;
 //                                }
-//                                printAll($results);
-                            }else{
+
+                            }
+                            elseif ( $ResultsTr-> trener_id == get_current_user_id() && $ResultsTr->program_id == 18){
+                                $results = $wpdb-> get_results($s = $wpdb->prepare("SELECT r.user_id id_user, u.surname, u.name, u.patronymic, u.email, r.group_id, p.date_reg, r.proforma_id, r.total, r.decision, r.section_a, r.section_b, r.section_c, r.date, r.date_update, r.trener_id, r.expert_id, r.moderator_id, r.review
+                                    FROM p_proforma_user_result r
+                                    LEFT OUTER JOIN p_groups_users p ON p.id_user = r.user_id
+                                    LEFT OUTER JOIN p_user_fields u ON u.user_id = r.user_id
+                                    WHERE r.group_id = %d GROUP BY r.user_id", $_GET['id']));
+
+
+                            }
+                            else{
                                 $results = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, p.start_date, p.end_date, u.surname, u.name, u.patronymic, u.email
                                 FROM p_groups_users g
                                 LEFT OUTER JOIN p_groups p ON p.id = g.id_group
                                 LEFT OUTER JOIN p_user_fields u ON u.user_id = g.id_user WHERE g.id_group = %d ORDER BY u.surname, u.name, u.patronymic", $_GET['id'] ));
                             }
 
-
+                            //printAll($ResultsTr);
+                            //printAll($results);
                             $linksGroupAll = $wpdb->get_results($wpdb->prepare('SELECT * FROM p_assessment_coding_group WHERE group_id = %d', $_GET['id']));
 
                             //if(!$results) echo'<meta http-equiv="refresh" content="0;url=/groups/?z=list" />';
@@ -563,7 +574,7 @@ foreach ($linksGroup as $link) {
                                                 Код
                                             </a>';
                                     }
-                                } elseif ( $ResultsTr->program_id == 14 || $ResultsTr->program_id == 17 || $ResultsTr->program_id == 6 || $ResultsTr->program_id == 18 ) // ОТОБРАЖЕНИЕ ВСЕХ РУБРИК ДЛЯ ПРОГРАММЫ
+                                } elseif ( $ResultsTr->program_id == 14 || $ResultsTr->program_id == 17 || $ResultsTr->program_id == 6 ) // ОТОБРАЖЕНИЕ ВСЕХ РУБРИК ДЛЯ ПРОГРАММЫ
                                 {
                                     $resRubricsql = "SELECT * FROM p_assessment_rubric WHERE group_id = %d AND create_user_id = %d AND listener_id = %d";
                                     $res->surname;
@@ -582,6 +593,7 @@ foreach ($linksGroup as $link) {
                                                 Рубрика';
 
                                     $rubric = "";
+
 
                                     if($ResultsTr->trener_id == get_current_user_id()){
                                         $resRubric = $wpdb->get_row($wpdb->prepare($resRubricsql, $_GET['id'], $ResultsTr->trener_id, $res->id_user));
@@ -714,19 +726,44 @@ foreach ($linksGroup as $link) {
                                                 '.$rubric_name.'
                                             </a>';
                                     }
-                                }  else {
+                                } else if ($ResultsTr->program_id == 18) {
 
+                                    $filelink = '<a href="#" id="fileu" data-id="'.$res->id_user.'" data-link="portal_server/?list_file_group_id='.$_GET['id'].'" data-toggle="modal" data-target="#Modal" class="btn btn-success">
+                                             '. $num = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM p_file WHERE group_id = %d AND user_id = %d", $_GET['id'], $res->id_user)) .'</a>';
+
+                                    //$rubriclink - оценивание, $rubriclink2 - рубрика
+                                    $rubriclink2 = ' <a href="#" id="fileu" data-id="'.$res->id_user.'" data-link="/assessment/?z=rubric_p_' . $ResultsTr->program_id . '&id='.$_GET['id'].'" data-toggle="modal" data-target="#Modal" class="btn btn-primary btn-xs">
+                                                Рубрика';
+                                    $rubric = '';
+
+
+                                    if($ResultsTr->trener_id == get_current_user_id()){
+                                        $resRubricsql = "SELECT * FROM p_proforma_user_result WHERE group_id = %d AND trener_id = %d AND user_id = %d";
+                                        $resRubric = $wpdb->get_row($wpdb->prepare($resRubricsql, $_GET['id'], $ResultsTr->trener_id, $res->id_user));
+
+                                        if( $resRubric->decision == 'Незачет'){
+                                            $rubric .= $rubriclink2 . "<br>тренера</a>";
+                                        }
+                                    }
+
+
+
+
+
+                                }
+                                else {
                                     $res->surname;
                                     $res->name;
                                     $res->patronymic;
                                     $res->email;
                                     $res->date_reg;
-                                    $filelink = '<a href="#" id="fileu" data-id="'.$res->id_user.'" data-link="portal_server/?list_file_group_id='.$_GET['id'].'" data-toggle="modal" data-target="#Modal" class="btn btn-success">
+                                    $filelink = '<a href="#" id="fileu" data-id="'.$res->id_user.'" data-link="portal_server/?list_file_group_id='.$_GET['id'].'" data-toggle="modal" data-target="#Modal" class="btn btn-primary">
                                              '. $num = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM p_file WHERE group_id = %d AND user_id = %d", $_GET['id'], $res->id_user)) .'</a>';
 
                                 }
 
                                 ?>
+
 
                             <?= ( getAccess( get_current_user_id() )->access == 1 && $ResultsTr->program_id == 7) ? '<form method="POST" action="/assessment/?z=appointed7">' : "" ?>
                                 <tr>

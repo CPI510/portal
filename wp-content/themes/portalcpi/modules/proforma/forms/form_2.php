@@ -429,7 +429,7 @@
                                     LEFT OUTER JOIN p_proforma_user_result p ON p.user_id = g.id_user
                                     WHERE g.id_group = %d AND p.group_id = %d $fiels_text $sql_filtr", $_GET['group'], $_GET['group'], $fiels_id)); // Это нужно для отображения пользователей этой группы
 
-                                if (    $groupInfo->trener_id == get_current_user_id()){        // Если тренер еще не поставил оценки
+                                if ( !$usersField && $groupInfo->trener_id == get_current_user_id()){        // Если тренер еще не поставил оценки
                                     $usersField = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, u.user_id, u.surname, u.name, u.patronymic, u.email
                                         FROM p_groups_users g
                                         LEFT OUTER JOIN p_user_fields u ON u.user_id = g.id_user 
@@ -457,7 +457,6 @@
                             <?php foreach ($usersField as $user): ?>
                                 <?php
                                     $user->decision = getDecisionById($user->id_user);
-
                                 ?>
 
                                 <tr>
@@ -548,6 +547,7 @@
                                                     } else {
                                                         echo $proformaDataUser[$q]->data_value;
                                                     }
+
                                                 ?>
 <!--                                                --><?php //= ($proformaDataUser[$q]->data_value == 3) ? "Плагиат" : $proformaDataUser[$q]->data_value ?>
                                             <?php endif; ?>

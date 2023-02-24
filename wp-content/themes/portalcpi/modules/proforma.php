@@ -8,7 +8,13 @@ authAll();
 
 get_header();
 
-pageCreate('/modules/proforma/');
+if(!is_user_logged_in()) {
+    sessionexpired();
+
+}else{
+    pageCreate('/modules/proforma/');
+}
+
 
 get_Footer();
 ?>

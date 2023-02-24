@@ -298,7 +298,7 @@ echo $s; exit();
     }
 
 
-}elseif($_GET['zip'] == 2 && $_GET['groupid'] && (getAccess(get_current_user_id())->access == 1 || getAccess(get_current_user_id())->access == 7 )){
+}elseif($_GET['zip'] == 2 && $_GET['groupid'] && (getAccess(get_current_user_id())->access == 1 || getAccess(get_current_user_id())->access == 7 || ( getAccess(get_current_user_id())->access == 4 && groupInfo($_GET['groupid'])->program_id == 18))){
     $groupInfo  = groupInfo($_GET['groupid']);
     //printAll($groupInfo); exit();
     if($_GET['portfolio'] == 1){

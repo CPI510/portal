@@ -242,6 +242,9 @@ g.expert_id, g.moderator_id, g.teamleader_id, g.potok
                                     <?php
                                     $groupArr = groupInfo($res->id);
                                     $listeners = '<span class="badge style-success"><a href="/groups/?z=group&id='. $res->id .'" >Слушателей: ' . $res->num_g . '</a></span><br>'; // должен видеть админ, тренер группы, эксперт группы, модератор и тимлидер в 14 программе
+                                    if ($res->program_id == 18) {
+                                        $listeners = '<span class="badge style-success"><a href="/groups/?z=group&id='. $res->id .'" >Педагоги: ' . $res->num_g . '</a></span><br>'; // должен видеть админ, тренер группы, эксперт группы, модератор и тимлидер в 14 программе
+                                    }
                                     $hidden = "Скрыто";
                                     if($res->program_id == 14 ){
                                         $assessment_sheet = '<span class="badge style-primary-dark"><a href="/assessment/?z=sheet'.$res->program_id.'&group='.$res->id.'">Лист оценивания</a></span><br>';
@@ -256,6 +259,7 @@ g.expert_id, g.moderator_id, g.teamleader_id, g.potok
                                         $assessment_sheet = '<span class="badge style-primary-dark"><a href="/assessment/?z=sheet&group='.$res->id.'">Лист оценивания</a></span><br>';
                                         $independent_trainer = "<b>Независимый тренер: </b>".nameUser($res->independent_trainer_id,5)."<br>";
                                     }
+
                                     $proforma = '<span class="badge style-primary-dark"><a href="/proforma/?form='.$res->proforma_id.'&group='.$res->id.' ">Проформа</a></span><br>';
                                     $proforma_empty = '<span class="badge">Проформа</span><br>';
                                     $download_all = '<span class="badge style-primary-bright">
@@ -464,6 +468,7 @@ g.expert_id, g.moderator_id, g.teamleader_id, g.potok
                                     }elseif( $res->trener_id == get_current_user_id() ){
                                         //
                                         $date = $groupArr->trener_date;
+                                        $download_all_files = $download_all;
                                         $res->number_group;
                                         $res->potok;
                                         $res->start_date;
@@ -626,6 +631,12 @@ g.expert_id, g.moderator_id, g.teamleader_id, g.potok
                                                             </span>
                                                     <?php endif; ?>
                                                 <?php endif; ?>
+
+                                                <?php if ($access == 4 && $res->program_id == 18): ?>
+                                                    <?= $download_all_files ?>
+
+                                                <?php endif; ?>
+
                                             </td>
                                             <td>
                                                 <?php if ($access == 1): ?>
