@@ -8,12 +8,14 @@ if($name_var = translateDir($_GET['group']) == 'name'){
     $lang_name = 'lang_name_ru';
     $name_org = 'name_org';
     $docLang = "rus";
+    $subject = SUBJECTS[$grinf->subject_id];
 }else{
     $p_name = "name_kaz";
     $name = "name_kaz";
     $lang_name = 'lang_name_kz';
     $name_org = "name_org_kaz";
     $docLang = "kaz";
+    $subject = SUBJECTS[$grinf->subject_id];
 }
 
 if($grinf->expert_id == get_current_user_id() && $grinf->program_id = 18){
@@ -62,7 +64,7 @@ $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($_SERVER['DOCUMENT
 $templateProcessor->setValue('date', htmlspecialchars(date('Y-m-d') ));
 $templateProcessor->setValue('name_org', htmlspecialchars($grinf->$name_org));
 $templateProcessor->setValue('group_name', htmlspecialchars($grinf->number_group));
-$templateProcessor->setValue('subject', htmlspecialchars($grinf->subject));
+$templateProcessor->setValue('subject', htmlspecialchars($subject));
 $templateProcessor->setValue('position_text', htmlspecialchars($position_text));
 
 $t=0;
