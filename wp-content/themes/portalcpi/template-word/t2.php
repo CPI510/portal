@@ -25,16 +25,19 @@ if($name_var = translateDir($_GET['group']) == 'name'){
 //}
 
 if ($grinf->trener_id == get_current_user_id() && $grinf->program_id = 18){
-    $fiels_text = "AND d.trener_id = %d";
+    $filed_name = "trener_id";
+    $fiels_text = "AND p.trener_id = %d";
     $fiels_id = $grinf->trener_id;
     $templateName = 'templates/18template_proforma_'.$docLang.'_trener-expert.docx';
     $position_text = 'Тренер';
 } elseif($grinf->expert_id == get_current_user_id() && $grinf->program_id = 18){
+    $filed_name = "expert_id";
     $fiels_text = "AND p.expert_id = %d";
     $fiels_id = $grinf->expert_id;
     $templateName = 'templates/18template_proforma_'.$docLang.'_trener-expert.docx';
     $position_text = 'Эксперт';
 } elseif($grinf->moderator_id == get_current_user_id() && $grinf->program_id = 18){
+    $filed_name = "moderator_id";
     $fiels_text = "AND p.moderator_id = %d";
     $fiels_id = $grinf->moderator_id;
     $templateName = '!!!!!!!!!!!!!!';
@@ -43,10 +46,9 @@ if ($grinf->trener_id == get_current_user_id() && $grinf->program_id = 18){
 
 $results = $wpdb->get_results($wpdb->prepare("SELECT d.id, d.user_id, u.surname, u.name, u.patronymic, p.total, p.decision, d.proforma_id,d.proforma_spr_id,d.group_id,d.data_value,d.trener_id,d.expert_id,d.moderator_id
                                                     FROM p_proforma_user_data d
-                                                    LEFT OUTER JOIN p_proforma_user_result p ON p.user_id = d.user_id 
+                                                    LEFT OUTER JOIN p_proforma_user_result p ON p.user_id = d.user_id AND p.$filed_name = d.$filed_name 
                                                     LEFT OUTER JOIN p_user_fields u ON u.user_id = d.user_id                                                     
-                                                    WHERE d.group_id = %d $fiels_text 
-                                                    GROUP BY d.id",$_GET['group'], $fiels_id));
+                                                    WHERE p.group_id = %d $fiels_text",$_GET['group'], $fiels_id));
 
 // 2 Цикла для оценок
 foreach ($results as $grade) {
@@ -68,11 +70,11 @@ foreach ($results as $grade) {
 }
 
 
-$templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($_SERVER['DOCUMENT_ROOT'] . '/wp-content/themes/portalcpi/template-word/'.$templateName);
 
+$templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($_SERVER['DOCUMENT_ROOT'] . '/wp-content/themes/portalcpi/template-word/'.$templateName);
 $count = count($results)/9;  //9 критериев
 $templateProcessor->setValue('date', htmlspecialchars(date('Y-m-d') ));
-$templateProcessor->setValue('name_org', htmlspecialchars($name_org));
+$templateProcessor->setValue('name_org', htmlspecialchars($grinf->$name_org));
 $templateProcessor->setValue('group_name', htmlspecialchars($grinf->number_group));
 $templateProcessor->setValue('subject', htmlspecialchars($grinf->subject));
 $templateProcessor->setValue('position_text', htmlspecialchars($position_text));

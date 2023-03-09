@@ -86,9 +86,11 @@ if($_POST['fileuserdata']) {
 
     if(get_current_user_id() == $groupInfo->expert_id ){
         $res = $wpdb->get_row($s=$wpdb->prepare("SELECT * FROM  p_proforma_user_result WHERE group_id = %d AND user_id = %d AND expert_id = %d", $_GET['id'], $_POST['fileuserdata'], get_current_user_id()));
+        $field_name = 'expert_id';
     }elseif(get_current_user_id() == $groupInfo->moderator_id){
         $res = $wpdb->get_row($s=$wpdb->prepare("SELECT * FROM  p_proforma_user_result WHERE group_id = %d AND user_id = %d", $_GET['id'], $_POST['fileuserdata']));
         $res->id = "";
+        $field_name = 'moderator_id';
     }
 
     ?>
@@ -100,21 +102,18 @@ if($_POST['fileuserdata']) {
     </h3>
 
     <div class="card">
-        <?php if(isset($res) && !empty($res->id )): ?>
+        <?php if(isset($res) && !empty($res->id )):?>
 
-            <?php if( get_current_user_id() == $groupInfo->teamleader_id && ($res->grading_solution == 1 || $res->grading_solution == 2) ): ?>
-                <a href="/export_to_word/?form=assessment_p_6&create_user_id=<?=$res->create_user_id?>&listener_id=<?=$res->listener_id?>&group=<?=$_GET['id']?>" class="btn btn-primary"><?=  ASSESSMENT_SECOND[0] ?></a>
-            <?php else: ?>
-                <a href="/export_to_word/?form=assessment_p_6&create_user_id=<?=$res->create_user_id?>&listener_id=<?=$res->listener_id?>&group=<?=$_GET['id']?>&ver=2" class="btn btn-primary"><?= ($groupInfo->teamleader_id == get_current_user_id()) ? DOWNLOAD_JUSTIFICATION : ASSESSMENT_SECOND[0] ?></a>
+            <?php if(!empty($res->review)) : ?>
+                <a href="/export_to_word/?form=<?= $res->proforma_id?>_review&group=<?= $res->group_id ?>&user_id=<?= $res->user_id?>" class="btn btn-primary"><?= ASSESSMENT_SECOND[0] ?> </a>
+            <?php else : ?>
+                <a class="btn btn-danger" disabled><?= ASSESSMENT_SECOND[0] ?></a>
             <?php endif; ?>
-        <?php else: ?>
-            <?php if ($groupInfo->teamleader_id == get_current_user_id()) {
-                $res = $wpdb->get_row($s=$wpdb->prepare("SELECT * FROM  p_assessment_rubric WHERE group_id = %d AND listener_id = %d AND create_user_id = %d", $_GET['id'], $_POST['fileuserdata'], $groupInfo->expert_id ));
-                $res->id = '';
-            } ?>
-            <a href="" class="btn btn-primary disabled"><?= ASSESSMENT_SECOND[0] ?></a>
-            <!--<a href="" class="btn btn-primary disabled"><?= RUBRIC_DOWNLOAD ?></a>-->
+
         <?php endif; ?>
+
+
+
         <?php //printAll($res); echo $s;?>
 
 
@@ -256,5 +255,7 @@ if($_POST['fileuserdata']) {
 //    printAll($_POST);
 
  ?>
+
+
 
 

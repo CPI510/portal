@@ -183,19 +183,19 @@
                         //section_a: $actions[section_a], section_b: $actions[section_b],  sections_c: $actions[section_c]<br>";
 
                         if ($actions['plagiarism'] == 3 &&  $actions['plagiarism_section_a'] == 3 ) {
-                            $final = 0;
+                            $final = "Плагиат";
                             $decision = "Незачет";
                             $section_a = "Плагиат";
                             $section_b = $actions['section_b'];
                             $section_c = $actions['section_c'];
                         } elseif ($actions['plagiarism'] == 3 &&  $actions['plagiarism_section_b'] == 3) {
-                            $final = 0;
+                            $final = "Плагиат";
                             $decision = "Незачет";
                             $section_a = $actions['section_a'];
                             $section_b = "Плагиат";
                             $section_c = $actions['section_c'];
                         } elseif ($actions['plagiarism'] == 3 &&  $actions['plagiarism_section_c'] == 3) {
-                            $final = 0;
+                            $final = "Плагиат";
                             $decision = "Незачет";
                             $section_a = $actions['section_a'];
                             $section_b = $actions['section_b'];
@@ -255,7 +255,7 @@
                             $result = $wpdb->update( 'p_proforma_user_result',
                                 [ 'section_c' => $section_c, 'section_b' => $section_b, 'section_a' => $section_a, 'total' => $final, 'decision' => $decision, 'date_update' => current_time('mysql', 0) ],
                                 [ 'user_id' => $uid, 'proforma_id' => $_GET['form'], 'group_id' => $_GET['group'], $field_name => get_current_user_id() ],
-                                [ '%s', '%s', '%s', '%d', '%s', '%s'],
+                                [ '%s', '%s', '%s', '%s', '%s', '%s'],
                                 [ '%d', '%d', '%d', '%d' ]
                             );
 
@@ -484,21 +484,22 @@
                                 <tr>
                                     <td><?= ++$counter; ?></td>
                                     <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="btn ink-reaction btn-icon-toggle btn-primary" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-chevron-down"></i></button>
-                                            <ul class="dropdown-menu" role="menu">
-                                                <li class="divider"></li>
-                                                <li><a href="/proforma/?form=<?= $_GET['form'] ?>r&group=<?= $_GET['group'] ?>&uid=<?= $user->user_id ?>" ><i class="md md-exit-to-app text-info"></i> Реккоммендация</a></li>
-                                                <li class="divider"></li>
-                                                <li><a href="/export_to_word/?form=<?= $_GET['form'] ?>a&group=<?= $_GET['group'] ?>&uid=<?= $user->user_id ?>" ><i class="md md-exit-to-app text-info"></i> Обоснование</a></li>
-                                                <li class="divider"></li>
-                                                <li><a href="#" id="fileu" data-id="<?= $user->user_id ?>" data-toggle="modal" data-target="#Modal">
-                                                        <i class="md md-exit-to-app text-info"></i>
-                                                        Файлы пользователя <?php  echo $num = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM p_file WHERE group_id = %d AND user_id = %d", $_GET['group'], $user->user_id)) ?>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
+<!--                                        Временно убрал, не нужный функционал скорее всего-->
+<!--                                        <div class="btn-group">-->
+<!--                                            <button type="button" class="btn ink-reaction btn-icon-toggle btn-primary" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-chevron-down"></i></button>-->
+<!--                                            <ul class="dropdown-menu" role="menu">-->
+<!--                                                <li class="divider"></li>-->
+<!--                                                <li><a href="/proforma/?form=--><?php //= $_GET['form'] ?><!--r&group=--><?php //= $_GET['group'] ?><!--&uid=--><?php //= $user->user_id ?><!--" ><i class="md md-exit-to-app text-info"></i> Реккоммендация</a></li>-->
+<!--                                                <li class="divider"></li>-->
+<!--                                                <li><a href="/export_to_word/?form=--><?php //= $_GET['form'] ?><!--a&group=--><?php //= $_GET['group'] ?><!--&uid=--><?php //= $user->user_id ?><!--" ><i class="md md-exit-to-app text-info"></i> Обоснование</a></li>-->
+<!--                                                <li class="divider"></li>-->
+<!--                                                <li><a href="#" id="fileu" data-id="--><?php //= $user->user_id ?><!--" data-toggle="modal" data-target="#Modal">-->
+<!--                                                        <i class="md md-exit-to-app text-info"></i>-->
+<!--                                                        Файлы пользователя --><?php // echo $num = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM p_file WHERE group_id = %d AND user_id = %d", $_GET['group'], $user->user_id)) ?>
+<!--                                                    </a>-->
+<!--                                                </li>-->
+<!--                                            </ul>-->
+<!--                                        </div>-->
                                         <?= $user->surname ?> <?= $user->$name_var ?> <?= $user->patronymic // ФИО Участика ?>
                                         <?php
                                         $choiceProforma = $wpdb->get_row($wpdb->prepare("SELECT * FROM p_proforma_teamleader_choice WHERE proforma_result_id = %d",$user->proforma_result_id));
@@ -604,7 +605,6 @@
 
                     <?php endif; ?>
                     <a href="/export_to_word/?form=<?= $_GET['form'] ?>&group=<?= $_GET['group'] ?>" class="btn btn-primary">Экспортировать проформу</a>
-                    <a href="/export_to_word/?form=<?= $_GET['form'] ?>b&group=<?= $_GET['group'] ?>" class="btn btn-primary">Лист оценивания</a>
                 </form>
             <?php endif; ?>
 
