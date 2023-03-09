@@ -91,11 +91,12 @@ if(isset($_GET['potok'])){
     <?php endif; ?>
     <?php
     $sqlAll = "SELECT g.id, g.number_group, g.trener_id, g.start_date, g.end_date, p.proforma_id, p.p_name, p.id program_id, g.trener_id, g.independent_trainer_id, 
-g.expert_id, g.moderator_id, g.teamleader_id, g.potok
+g.expert_id, g.moderator_id, g.teamleader_id, g.observer_id, g.potok
 , COUNT(u.id_group) num_g, f.surname t_surname, f.name t_name, f.patronymic t_patronymic
 , e.surname expert_surname, e.name expert_name, e.patronymic expert_patronymic
 , m.surname moderator_surname, m.name moderator_name, m.patronymic moderator_patronymic
 , t.surname teamleader_surname, t.name teamleader_name, t.patronymic teamleader_patronymic 
+, o.surname observer_surname, o.name observer_name, o.patronymic observer_patronymic
                             FROM p_groups g
                             LEFT JOIN p_programs p ON p.id = g.program_id
                             LEFT JOIN p_groups_users u ON u.id_group = g.id
@@ -103,6 +104,7 @@ g.expert_id, g.moderator_id, g.teamleader_id, g.potok
                             LEFT OUTER JOIN p_user_fields e ON e.user_id = g.expert_id
                             LEFT OUTER JOIN p_user_fields m ON m.user_id = g.moderator_id
                             LEFT OUTER JOIN p_user_fields t ON t.user_id = g.teamleader_id
+                            LEFT OUTER JOIN p_user_fields o ON o.user_id = g.observer_id
                             WHERE g.deleted = 0 $notactive $potok_sql ";
 
     if ($access == 1){
@@ -605,13 +607,22 @@ g.expert_id, g.moderator_id, g.teamleader_id, g.potok
 
                                             <td>
                                                 <?php if($access == 1 && $res->program_id != 15): ?>
+
+                                                    <?php if($res->program_id != 18): ?>
+                                                        <?= $independent_trainer; ?>
+                                                    <?php endif; ?>
+
                                                     <b>Тренер:</b> <?= $res->t_surname ?> <?= $res->t_name ?> <?= $res->t_patronymic ?><br>
                                                     <b>Эксперт:</b> <?= $res->expert_surname ?> <?= $res->expert_name ?> <?= $res->expert_patronymic ?><br>
                                                     <b>Модератор:</b> <?= $res->moderator_surname ?> <?= $res->moderator_name ?> <?= $res->moderator_patronymic ?><br>
-                                                    <?= $independent_trainer; ?>
+
                                                     <b>Тимлидер:</b> <?= $res->teamleader_surname ?> <?= $res->teamleader_name ?> <?= $res->teamleader_patronymic ?><br>
                                                 <?php else: ?>
                                                     <b><?= $user_role_FIO ?></b>
+                                                <?php endif; ?>
+
+                                                <?php if($access == 1 && $res->program_id == 18): ?>
+                                                    <b>Наблюдатель: </b> <?= $res->observer_surname ?> <?= $res->observer_name ?> <?= $res->observer_patronymic ?><br>
                                                 <?php endif; ?>
                                             </td>
                                             <td>

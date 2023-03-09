@@ -770,8 +770,8 @@ function setRepeatersGroupName(){
     return "Повторное оценивание " . ($counter +1);
 }
 
-function getDecisionById($id){
+function getDecisionById($id, $fiels_text, $fiels_id){
     global $wpdb;
-    $result = $wpdb->get_row("SELECT `decision` from p_proforma_user_result WHERE `user_id` = $id");
-    return $result->decision;
+    $result = $wpdb->get_var($wpdb->prepare("SELECT `decision` from p_proforma_user_result p WHERE `user_id` = $id $fiels_text ", $fiels_id));
+    return $result;
 }

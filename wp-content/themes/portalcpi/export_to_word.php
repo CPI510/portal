@@ -5,7 +5,7 @@ Template Post Type: post, page, product
 */
 
 //ini_set('error_reporting', E_ALL);
-//ini_set('display_errors', 1);
+ini_set('display_errors', 1);
 //ini_set('display_startup_errors', 1);
 
 global $wpdb;
@@ -42,7 +42,6 @@ $phpWord = new \PhpOffice\PhpWord\PhpWord();
 
 if($_GET['form'] && $_GET['group']) require_once 'template-word/t' . $_GET['form'] . '.php';
 else exit("Нет данных!");
-
 // Adding Text element with font customized using explicitly created font style object...
 // $fontStyle = new \PhpOffice\PhpWord\Style\Font();
 // $fontStyle->setBold(true);

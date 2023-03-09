@@ -33,6 +33,9 @@
             $time_end = $groupInfo->end_date;
         }
 
+
+
+
         $messageText = "
                     На портале ЦПИ была проведена оценка.
                     <br><br>Оценку провел $mail_text: ".nameUser(get_current_user_id(),5)."
@@ -80,7 +83,7 @@
                     foreach ( $spr_id as $spr_id => $section ) {
                         foreach ($section as $section_id => $item){
                             foreach ( $item as $key => $value ){
-                                //echo "userid: $user_id, sprid: $spr_id, sectionid: $section_id, value: $value , key: $key  <br>";
+                                //echo "userid: $user_id, sprid: $spr_id, sectionid: $section_id, value: $value , key: $key  <br>"; exit();
 
                                 if ( $key == 1 ){
                                     //insert
@@ -286,6 +289,7 @@
                 //DELETE FROM `p_proforma_user_data` WHERE `user_id` = 10730 or `user_id` = 10729 or `user_id` = 10728
                 echo "<meta http-equiv='refresh' content='0;url=/proforma/?form=$_GET[form]&group=$_GET[group]' />"; exit();
 
+
                 ?>
             <?php else: ?>
                 <form novalidate id="form" method="post" action="/proforma/?form=<?= $_GET['form'] ?>&group=<?= $_GET['group'] ?>">
@@ -422,25 +426,42 @@
                                         echo "<meta http-equiv='refresh' content='0;url=/proforma/?form=$_GET[form]&group=$_GET[group]' />"; exit();
                                     }
                                 }
-                            }else{  //Показ оценок
+                            }else{
+                                //Все участники группы
+                                $allUsersOfGroup = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, u.user_id, u.surname, u.name, u.patronymic, u.email
+                                        FROM p_groups_users g
+                                        LEFT OUTER JOIN p_user_fields u ON u.user_id = g.id_user 
+                                        WHERE g.id_group = %d", $_GET['group']));
+
+                                // Участники групп с оценками
                                 $usersField = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, u.user_id, u.surname, u.name, u.patronymic, u.email, p.total, p.decision, p.section_a, p.section_b, p.trener_id, p.expert_id, p.moderator_id, p.id proforma_result_id
                                     FROM p_groups_users g
                                     LEFT OUTER JOIN p_user_fields u ON u.user_id = g.id_user
                                     LEFT OUTER JOIN p_proforma_user_result p ON p.user_id = g.id_user
                                     WHERE g.id_group = %d AND p.group_id = %d $fiels_text $sql_filtr", $_GET['group'], $_GET['group'], $fiels_id)); // Это нужно для отображения пользователей этой группы
 
-                                if ( !$usersField && $groupInfo->trener_id == get_current_user_id()){        // Если тренер еще не поставил оценки
+
+                                if ( !$usersField && $groupInfo->trener_id == get_current_user_id() || (count($allUsersOfGroup) != count($usersField)) ){        // Если тренер еще не поставил оценки
                                     $usersField = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, u.user_id, u.surname, u.name, u.patronymic, u.email
                                         FROM p_groups_users g
                                         LEFT OUTER JOIN p_user_fields u ON u.user_id = g.id_user 
                                         WHERE g.id_group = %d", $_GET['group']));
-                                }elseif(!$usersField && $groupInfo->expert_id == get_current_user_id()){    // Если эксперт еще не поставил оценки
-                                    $usersField = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, u.user_id, u.surname, u.name, u.patronymic, u.email, p.total, p.decision, p.section_a, p.section_b,  p.trener_id, p.expert_id, p.moderator_id, p.id proforma_result_id
+                                }
+                                // TODO Старая версия, позже посмотреть почему так написл код
+//                                elseif(!$usersField && $groupInfo->expert_id == get_current_user_id()){    // Если эксперт еще не поставил оценки
+//                                    $usersField = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, u.user_id, u.surname, u.name, u.patronymic, u.email, p.total, p.decision, p.section_a, p.section_b,  p.trener_id, p.expert_id, p.moderator_id, p.id proforma_result_id
+//                                        FROM p_groups_users g
+//                                        LEFT OUTER JOIN p_user_fields u ON u.user_id = g.id_user
+//                                        LEFT OUTER JOIN p_proforma_user_result p ON p.user_id = g.id_user
+//                                        WHERE g.id_group = %d AND p.group_id = %d AND trener_id = %d AND p.total < 20", $_GET['group'], $_GET['group'], $groupInfo->trener_id));
+//                                }
+                                elseif (!$usersField && $groupInfo->expert_id == get_current_user_id()){
+                                    $usersField = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, u.user_id, u.surname, u.name, u.patronymic, u.email
                                         FROM p_groups_users g
                                         LEFT OUTER JOIN p_user_fields u ON u.user_id = g.id_user 
-                                        LEFT OUTER JOIN p_proforma_user_result p ON p.user_id = g.id_user 
-                                        WHERE g.id_group = %d AND p.group_id = %d AND trener_id = %d AND p.total < 20", $_GET['group'], $_GET['group'], $groupInfo->trener_id));
-                                }elseif(!$usersField && $groupInfo->moderator_id == get_current_user_id()){ // Если модератор еще не поставил оценки, берется данные эксперта
+                                        WHERE g.id_group = %d", $_GET['group']));
+                                }
+                                elseif(!$usersField && $groupInfo->moderator_id == get_current_user_id()){ // Если модератор еще не поставил оценки, берется данные эксперта
                                     $usersField = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, u.user_id, u.surname, u.name, u.patronymic, u.email, p.total, p.decision, p.section_a, p.section_b,  p.trener_id, p.expert_id, p.moderator_id, p.id proforma_result_id
                                     FROM p_groups_users g
                                     LEFT OUTER JOIN p_user_fields u ON u.user_id = g.id_user 
@@ -456,7 +477,8 @@
 
                             <?php foreach ($usersField as $user): ?>
                                 <?php
-                                    $user->decision = getDecisionById($user->id_user);
+                                    // Показывает поле решение если оно есть
+                                    $user->decision = getDecisionById($user->id_user, $fiels_text,$fiels_id);
                                 ?>
 
                                 <tr>
@@ -487,16 +509,29 @@
                                                 class='btn btn-success btn-xs' id='timer'>Выбрать оценку</a>";
                                         } ?>
                                     </td>
-                                    <?php $proformaDataUser = $wpdb->get_results($s=$wpdb->prepare("SELECT p.id, p.user_id, p.proforma_id, p.proforma_spr_id, p.group_id, p.datetime, p.data_value, p.datetime_update, p.trener_id, p.expert_id, p.moderator_id FROM p_proforma_user_data p WHERE p.user_id= %d AND p.proforma_id = %d AND p.group_id =%d $fiels_text"
-                                        , $user->user_id, $_GET['form'], $_GET['group'], $fiels_id ));
+                                    <?php
+                                        //Показываются оценки если они есть
+                                        $proformaDataUser = $wpdb->get_results($s=$wpdb->prepare("SELECT p.id, p.user_id, p.proforma_id, p.proforma_spr_id, p.group_id, p.datetime, p.data_value, p.datetime_update, p.trener_id, p.expert_id, p.moderator_id 
+                                                FROM p_proforma_user_data p 
+                                                WHERE p.user_id= %d AND p.proforma_id = %d AND p.group_id =%d $fiels_text"
+                                            , $user->user_id, $_GET['form'], $_GET['group'], $fiels_id ));
+
+//                                        // Если не выставил оценки
+//                                        if(!$proformaDataUser){
+//                                            $proformaDataUser = $wpdb->get_results($s=$wpdb->prepare("SELECT p.id, p.user_id, p.proforma_id, p.proforma_spr_id, p.group_id, p.datetime, p.data_value, p.datetime_update, p.trener_id, p.expert_id, p.moderator_id
+//                                                FROM p_proforma_user_data p
+//                                                WHERE p.user_id= %d AND p.proforma_id = %d AND p.group_id =%d"
+//                                                , $user->user_id, $_GET['form'], $_GET['group'] ));
+//                                            $action_moderator = 1;
+//
+//                                        }
 
 
 
-                                    if(!$proformaDataUser){
-                                        $proformaDataUser = $wpdb->get_results($s=$wpdb->prepare("SELECT p.id, p.user_id, p.proforma_id, p.proforma_spr_id, p.group_id, p.datetime, p.data_value, p.datetime_update, p.trener_id, p.expert_id, p.moderator_id FROM p_proforma_user_data p WHERE p.user_id= %d AND p.proforma_id = %d AND p.group_id =%d AND trener_id"
-                                            , $user->user_id, $_GET['form'], $_GET['group'], $groupInfo->trener_id ));
-                                        $action_moderator = 1;
-                                    } ?>
+
+                                    ?>
+
+
                                     <?php $q=0; ?>
 
                                     <?php foreach ($proformaSpr as $data): ?>

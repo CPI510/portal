@@ -183,10 +183,7 @@
 					
 		<h2>
             <?php
-//            global $wpdb;
-//            $results = $wpdb-> get_results($s = $wpdb->prepare("SELECT d.id, d.user_id, d.proforma_id, d.proforma_spr_id,d.group_id, d.datetime,d.data_value, d.datetime_update, d.trener_id, d.expert_id, d.moderator_id FROM p_proforma_user_data d
-//                WHERE d.group_id = %d", $_GET['id']));
-//            printAll($results);
+            global $wpdb;
 
 
 

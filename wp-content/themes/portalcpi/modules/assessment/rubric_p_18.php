@@ -4,13 +4,12 @@ global $wpdb;
 $_POST = json_decode(file_get_contents("php://input"), true);
 
 if($_POST['fileuserdata']) {
-
     if ( $_POST['dataid'] ){
         if($wpdb->update( 'p_proforma_user_result',
             [   'review' => $_POST['review'],
                 'date_update' => dateTime()
             ],
-            [ 'group_id' => $_POST['id'], 'user_id' => $_POST['fileuserdata'] ],
+            [ 'group_id' => $_POST['id'], 'user_id' => $_POST['fileuserdata'], 'id' => $_POST['dataid'] ],
             [ '%s', '%s' ],
             [ '%d', '%d' ]
             )) {
@@ -85,14 +84,15 @@ if($_POST['fileuserdata']) {
 
     <?php
 
-    if($res = $wpdb->get_row($s=$wpdb->prepare("SELECT * FROM  p_proforma_user_result WHERE group_id = %d AND user_id = %d", $_GET['id'], $_POST['fileuserdata']))){
-
+    if(get_current_user_id() == $groupInfo->expert_id ){
+        $res = $wpdb->get_row($s=$wpdb->prepare("SELECT * FROM  p_proforma_user_result WHERE group_id = %d AND user_id = %d AND expert_id = %d", $_GET['id'], $_POST['fileuserdata'], get_current_user_id()));
     }elseif(get_current_user_id() == $groupInfo->moderator_id){
         $res = $wpdb->get_row($s=$wpdb->prepare("SELECT * FROM  p_proforma_user_result WHERE group_id = %d AND user_id = %d", $_GET['id'], $_POST['fileuserdata']));
         $res->id = "";
     }
 
     ?>
+
 
     <h3><?php
         echo "<div align='center'>".ASSESSMENT_SECOND[2]." <br>".LISTENER_TEXT.": " . nameUser($_POST['fileuserdata'], 5) . "</div>";
@@ -152,7 +152,7 @@ if($_POST['fileuserdata']) {
                 <?php for($y = 1; $y <= 3; $y++): // Это для отображение данныех тренера эксперта и модератора ?>
                     <?php if($y == 1){ //Все для тренера
                         $link_choice = "&trener_id={$groupInfo->trener_id}";
-                        $fiels_text = "AND p.trener_id = %d";
+                        $fiels_text = "AND d.trener_id = %d";
                         $fiels_id = $groupInfo->trener_id;
                         $part_text = "тренера";
                         if($groupInfo->trener_id == get_current_user_id()) {
@@ -165,7 +165,7 @@ if($_POST['fileuserdata']) {
                         }
                     } else if ($y == 2) {
                         $link_choice = "&expert_id={$groupInfo->expert_id}";
-                        $fiels_text = "AND p.expert_id = %d";
+                        $fiels_text = "AND d.expert_id = %d";
                         $fiels_id = $groupInfo->expert_id;
                         $part_text = "эксперта";
                         if($groupInfo->expert_id == get_current_user_id()) {
@@ -176,7 +176,7 @@ if($_POST['fileuserdata']) {
                     }
                     else{ //Все для модератора
                         $link_choice = "&moderator_id={$groupInfo->moderator_id}";
-                        $fiels_text = "AND p.moderator_id = %d";
+                        $fiels_text = "AND d.moderator_id = %d";
                         $fiels_id = $groupInfo->moderator_id;
                         $part_text = "модератора";
                     } ?>
@@ -184,13 +184,13 @@ if($_POST['fileuserdata']) {
                         <th colspan="22">Оценка <?= $part_text ?></th>
                     </tr>
                     <?php
-                        $userData = $wpdb->get_results($wpdb->prepare("SELECT d.user_id, r.decision, r.total, d.proforma_id, d.proforma_spr_id, s.section_id, d.group_id, d.datetime, d.data_value, d.trener_id, d.expert_id, d.moderator_id
-                            FROM p_proforma_user_data d 
-                            LEFT OUTER JOIN p_proforma_user_result r ON r.user_id = d.user_id
-                            LEFT OUTER JOIN p_proforma_spr s ON s.id = d.proforma_spr_id
-                            WHERE d.user_id = %d", $_POST['fileuserdata'] )); // Это нужно для отображения пользователей этой группы
+                        $userData = $wpdb->get_results($wpdb->prepare("SELECT d.user_id, d.proforma_id, d.proforma_spr_id, d.group_id, d.datetime, d.data_value, d.trener_id, d.expert_id, d.moderator_id
+                            FROM p_proforma_user_data d                                
+                            WHERE d.user_id = %d $fiels_text", $_POST['fileuserdata'], $fiels_id )); // Это нужно для отображения оценок этой группы
 
-
+                        $userResult = $wpdb->get_row($wpdb->prepare("SELECT d.total, d.decision,d.section_a, d.section_b, d.section_c 
+                            FROM p_proforma_user_result d                              
+                            WHERE d.user_id = %d $fiels_text", $_POST['fileuserdata'], $fiels_id )); // Это нужно для отображения результатов этой группы
                     ?>
 
                     <tr>
@@ -205,36 +205,19 @@ if($_POST['fileuserdata']) {
                                     }
 //                                ?>
                                 <td>
-                                    <select name="item[<?= $user->user_id ?>][<?= $user->proforma_spr_id ?>][<?= $user->section_id ?>][<?= $action ?>]" class="form-control" required>
-                                        <option></option>
-
-                                        <?php if(($user->data_value == 3)){
-                                            echo '<option value="0">0</option>
-                                                          <option value="1">1</option>
-                                                          <option value="2">2</option>
-                                                          <option value="3" selected>Плагиат</option>  
-                                                          <option value="-1">Неявка</option>  
-                                                          ';
-                                        }elseif(($user->data_value == -1 )){
-                                            echo '<option value="0">0</option>
-                                                          <option value="1">1</option>
-                                                          <option value="2">2</option>
-                                                          <option value="3">Плагиат</option>  
-                                                          <option value="-1" selected>Неявка</option>  
-                                                          ';
-                                        } else{
-                                            ?>
-                                            <option value="0" <?= (isset($user->data_value) && $user->data_value == 0) ? "selected" : "" ?>>0</option>
-                                            <option value="1" <?= ($user->data_value == 1) ? "selected" : "" ?>>1</option>
-                                            <option value="2" <?= ($user->data_value == 2) ? "selected" : "" ?>>2</option>
-                                            <option value="3" >Плагиат</option>
-                                            <option value="-1" >Неявка</option>
-                                        <?php } ?>
-                                    </select>
+                                    <?php
+                                        if($user->data_value == 3){
+                                            echo 'Плагиат';
+                                        } elseif($user->data_value == -1){
+                                             echo 'Плагиат';
+                                        } else {
+                                            echo $user->data_value;
+                                        }
+                                        ?>
                                 </td>
                             <?php endforeach?>
-                        <td><?= $user->total ?></td>
-                        <td><?= $user->decision ?></td>
+                        <td><?= $userResult->total ?></td>
+                        <td><?= $userResult->decision ?></td>
                     </tr>
                 <?php endfor; ?>
             </table>
@@ -255,6 +238,8 @@ if($_POST['fileuserdata']) {
         </div><!--end .card-body -->
 
     </div><!--end .card -->
+
+
 
     <div class="boxcoding"></div>
     <div class="card-actionbar">
