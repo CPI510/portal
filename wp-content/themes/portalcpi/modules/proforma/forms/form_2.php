@@ -23,6 +23,12 @@
             $mail_text = "модератор";
             $time_end = $groupInfo->moderator_date;
 
+            if ($groupInfo->program_id == 18) {
+                alertStatus('danger','Доступ запрещен',true);
+                exit();
+            }
+
+
         }elseif( $groupInfo->teamleader_id == get_current_user_id() ){
             $mail_text = "тимлидер";
             $time_end = $groupInfo->teamleader_date;
@@ -56,21 +62,10 @@
             <b>Программа:</b> <?=$groupInfo->p_name?><br>
             <b>Тренер:</b> <?= $groupInfo->surname ?> <?= $groupInfo->name ?> <?= $groupInfo->patronymic ?></a><br>
             <b>Язык обучения:</b> <?= $groupInfo->lang_name_ru ?> <br>
-
-
-
-            <h3 class="text-primary-dark">Осталось времени до окончания работы: <span id="display"></span></h3>
-
-<!--            <script>-->
-<!--                const display--><?php //= $q ?><!-- = document.querySelector('#display--><?php //= $q ?><!--');-->
-<!--                countDown('--><?php //= $time_end ?><!--', display--><?php //= $q ?><!--);-->
-<!--            </script>-->
-
-
-
         </div>
     </div>
 </div>
+
 <div class="row">
 
     <div id="select_validation" class=""></div>
@@ -440,8 +435,8 @@
                                     LEFT OUTER JOIN p_proforma_user_result p ON p.user_id = g.id_user
                                     WHERE g.id_group = %d AND p.group_id = %d $fiels_text $sql_filtr", $_GET['group'], $_GET['group'], $fiels_id)); // Это нужно для отображения пользователей этой группы
 
-
-                                if ( !$usersField && $groupInfo->trener_id == get_current_user_id() || (count($allUsersOfGroup) != count($usersField)) ){        // Если тренер еще не поставил оценки
+                                // Проверить условие, было ИЛИ, поменял на И, потом проверить
+                                if ( !$usersField && $groupInfo->trener_id == get_current_user_id() && (count($allUsersOfGroup) != count($usersField)) ){        // Если тренер еще не поставил оценки
                                     $usersField = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, u.user_id, u.surname, u.name, u.patronymic, u.email
                                         FROM p_groups_users g
                                         LEFT OUTER JOIN p_user_fields u ON u.user_id = g.id_user 
@@ -462,11 +457,12 @@
                                         WHERE g.id_group = %d", $_GET['group']));
                                 }
                                 elseif(!$usersField && $groupInfo->moderator_id == get_current_user_id()){ // Если модератор еще не поставил оценки, берется данные эксперта
-                                    $usersField = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, u.user_id, u.surname, u.name, u.patronymic, u.email, p.total, p.decision, p.section_a, p.section_b,  p.trener_id, p.expert_id, p.moderator_id, p.id proforma_result_id
+                                    $usersField = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, u.user_id, u.surname, u.name, u.patronymic, u.email, p.trener_id, p.expert_id, p.moderator_id
                                     FROM p_groups_users g
                                     LEFT OUTER JOIN p_user_fields u ON u.user_id = g.id_user 
                                     LEFT OUTER JOIN p_proforma_user_result p ON p.user_id = g.id_user 
-                                    WHERE g.id_group = %d AND p.group_id = %d AND expert_id = %d AND p.total < 20", $_GET['group'], $_GET['group'], $groupInfo->expert_id));
+                                    WHERE g.id_group = %d AND p.group_id = %d AND expert_id = %d AND p.decision = 'Незачет'", $_GET['group'], $_GET['group'], $groupInfo->expert_id));
+
                                 }
                             }
 
@@ -550,7 +546,8 @@
                                             <?php if($groupInfo->trener_id == get_current_user_id()  || $groupInfo->expert_id == get_current_user_id() || $groupInfo->moderator_id == get_current_user_id()): ?>
                                                 <select name="item[<?= $user->user_id ?>][<?= $data->id ?>][<?= $data->section_id ?>][<?= $action ?>]" class="form-control" required>
                                                     <option></option>
-                                                    <?php if(($proformaDataUser[$q]->data_value == 3 || ($data->section_id == 1 && $user->section_a == "Плагиат") || ($data->section_id == 2 && $user->section_b == "Плагиат")  || ($data->section_id == 3 && $user->section_c == "Плагиат"))){
+                                                    <?php if(($proformaDataUser[$q]->data_value == 3)){
+                                                        //Прошлое условие которое показывало плагиатом целую секцию if(($proformaDataUser[$q]->data_value == 3 || ($data->section_id == 1 && $user->section_a == "Плагиат") || ($data->section_id == 2 && $user->section_b == "Плагиат")  || ($data->section_id == 3 && $user->section_c == "Плагиат")))
                                                         echo '<option value="0">0</option>
                                                           <option value="1">1</option>
                                                           <option value="2">2</option>

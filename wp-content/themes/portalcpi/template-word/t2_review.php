@@ -84,13 +84,21 @@ foreach($arrGrade as $data) {
 //        printAll('k'.$i.'#'.$t);
 //        exit();
     }
+    if ($data['decision'] == 'Зачет') $decision = ASSESSMENT_SHEET[7];
+    if ($data['decision'] == 'Незачет') $decision = ASSESSMENT_SHEET[8];
+    if ($data['decision'] == 'Неявка') $decision = ASSESSMENT_SHEET[10];
+    if ($data['total'] == 'Плагиат') $total = "";
+    elseif ($decision == ASSESSMENT_SHEET[10]) $total = "-";
+    else $total = $data['total'];
+
     $templateProcessor->setValue('userName', htmlspecialchars($data['surname']. ' ' .$data['name']. ' ' .$data['patronymic']));
-    $templateProcessor->setValue('total', htmlspecialchars($data['total']));
-    $templateProcessor->setValue('decision', htmlspecialchars($data['decision']));
+    $templateProcessor->setValue('total', htmlspecialchars($total));
+    $templateProcessor->setValue('decision', htmlspecialchars($decision));
     $templateProcessor->setValue('review', htmlspecialchars($data['review']));
 }
 
-$file = 'focus_review.docx';
+$file = $results[0]->surname.'_'.$results[0]->surname.'.docx';
+
 
 header("Content-Description: File Transfer");
 header('Content-Disposition: attachment; filename="' . $file . '"');

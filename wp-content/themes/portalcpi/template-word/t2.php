@@ -64,7 +64,6 @@ foreach ($results as $grade) {
 }
 
 
-
 $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($_SERVER['DOCUMENT_ROOT'] . '/wp-content/themes/portalcpi/template-word/'.$templateName);
 $count = count($results)/9;  //9 критериев
 $templateProcessor->setValue('date', htmlspecialchars(date('Y-m-d') ));
@@ -89,13 +88,20 @@ foreach($arrGrade as $data) {
         }
         $templateProcessor->setValue('k'.$i.'#'.$t, htmlspecialchars($k));
     }
+    if ($data['decision'] == 'Зачет') $decision = ASSESSMENT_SHEET[7];
+    if ($data['decision'] == 'Незачет') $decision = ASSESSMENT_SHEET[8];
+    if ($data['decision'] == 'Неявка') $decision = ASSESSMENT_SHEET[10];
+    if ($data['total'] == 'Плагиат') $total = "";
+    elseif ($decision == ASSESSMENT_SHEET[10]) $total = "-";
+    else $total = $data['total'];
+
     $templateProcessor->setValue('rowNumber#'.$t, htmlspecialchars($t));
     $templateProcessor->setValue('userName#'.$t, htmlspecialchars($data['surname']. ' ' .$data['name']. ' ' .$data['patronymic']));
-    $templateProcessor->setValue('total#'.$t, htmlspecialchars($data['total']));
-    $templateProcessor->setValue('decision#'.$t, htmlspecialchars($data['decision']));
+    $templateProcessor->setValue('total#'.$t, htmlspecialchars($total));
+    $templateProcessor->setValue('decision#'.$t, htmlspecialchars($decision));
 }
 
-$file = 'focus_test.docx';
+$file = 'Проформа для оценивания.docx';
 
 header("Content-Description: File Transfer");
 header('Content-Disposition: attachment; filename="' . $file . '"');

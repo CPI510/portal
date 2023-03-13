@@ -168,12 +168,12 @@ foreach ($linksGroup as $link) {
                     <a href="/assessment/?z=sheet<?= ($ResultsTr->program_id == 14 || $ResultsTr->program_id == 6 || $ResultsTr->program_id == 16) ? $ResultsTr->program_id : "" ?>&group=<?= $_GET['id'] ?>" class="btn btn-success"><?= LIST_ASSESMENT_NAME ?></a>
                 <?php endif; ?>
 
-                <?php if ($ResultsTr->program_id == 18): ?>
+                <?php if ($ResultsTr->program_id == 18 && ($ResultsTr->trener_id == get_current_user_id() || $ResultsTr->expert_id == get_current_user_id())): ?>
                         <a href="/proforma/?form=<?= $ResultsTr->proforma_id ?>&group=<?= $_GET['id'] ?>" class="btn btn-success">Проформа</a>
 <!--                        <a href="/assessment/?z=sheet--><?php //= ($ResultsTr->program_id == 18) ? $ResultsTr->program_id : "" ?><!--&group=--><?php //= $_GET['id'] ?><!--" class="btn btn-success">Проформа</a>-->
                 <?php endif; ?>
 
-                <?php elseif (getAccess(get_current_user_id())->access == 1 || getAccess(get_current_user_id())->access == 7 && $ResultsTr->program_id != 14 && $ResultsTr->program_id != 6 && $ResultsTr->program_id != 16): ?>
+                <?php elseif (getAccess(get_current_user_id())->access == 1 || getAccess(get_current_user_id())->access == 7 && $ResultsTr->program_id != 14 && $ResultsTr->program_id != 6 && $ResultsTr->program_id != 16 && $ResultsTr->program_id != 18): ?>
 
                     <?php if($ResultsTr->proforma_id == 0): ?>
 <!--                        <a href="#" class="btn" disabled="">Проформа</a>-->
@@ -412,7 +412,9 @@ foreach ($linksGroup as $link) {
                             <?php
                             //TODO Данный блок показывает кому открыввется доступ для последующей проверки
                             $rubric_name = ASSESSMENT_SECOND[2];
-                            if($ResultsTr->moderator_id == get_current_user_id() && ($ResultsTr->program_id == 14 || $ResultsTr->program_id == 18)){ //если модератор выводим только тех у кого эксперт поставил 4(неудовлетварительно)
+
+
+                            if($ResultsTr->moderator_id == get_current_user_id() && ($ResultsTr->program_id == 14)){ //если модератор выводим только тех у кого эксперт поставил 4(неудовлетварительно)
                                 $results = $wpdb->get_results($s=$wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, p.start_date, p.end_date, u.surname, u.name, u.patronymic, u.email, r.grading_solution
                                 FROM p_groups_users g
                                 LEFT OUTER JOIN p_assessment_rubric r ON r.listener_id = g.id_user AND r.group_id = %d AND r.create_user_id = %d 
@@ -490,8 +492,13 @@ foreach ($linksGroup as $link) {
                                     LEFT OUTER JOIN p_groups_users p ON p.id_user = r.user_id
                                     LEFT OUTER JOIN p_user_fields u ON u.user_id = r.user_id
                                     WHERE r.group_id = %d AND expert_id = %d GROUP BY r.user_id", $_GET['id'], $ResultsTr-> expert_id));
-
-
+                            }
+                            elseif ($ResultsTr->moderator_id == get_current_user_id() && $ResultsTr->program_id == 18){
+                                $results = $wpdb-> get_results($s = $wpdb->prepare("SELECT r.user_id id_user, u.surname, u.name, u.patronymic, u.email, r.group_id, p.date_reg, r.proforma_id, r.total, r.decision, r.section_a, r.section_b, r.section_c, r.date, r.date_update, r.trener_id, r.expert_id, r.moderator_id, r.review
+                                    FROM p_proforma_user_result r
+                                    LEFT OUTER JOIN p_groups_users p ON p.id_user = r.user_id
+                                    LEFT OUTER JOIN p_user_fields u ON u.user_id = r.user_id
+                                    WHERE r.group_id = %d AND decision = 'Незачет' AND expert_id = %d", $_GET['id'], $ResultsTr-> expert_id));
                             }
                             else{
                                 $results = $wpdb->get_results($wpdb->prepare("SELECT g.id_group, g.id_user, g.date_reg, p.start_date, p.end_date, u.surname, u.name, u.patronymic, u.email
@@ -744,6 +751,18 @@ foreach ($linksGroup as $link) {
                                             $rubric .= $rubriclink2 . "<br>эксперта</a>";
                                         }
                                     }
+                                    elseif ($ResultsTr->moderator_id == get_current_user_id()) {
+                                        $resRubricsql = "SELECT * FROM p_proforma_user_result WHERE group_id = %d AND expert_id = %d AND user_id = %d";
+                                        $resRubric = $wpdb->get_row($wpdb->prepare($resRubricsql, $_GET['id'], $ResultsTr->expert_id, $res->id_user));
+
+                                        $rubriclink2 = ' <a href="#" id="fileu" data-id="'.$res->id_user.'" data-link="/assessment/?z=for_moder_teamleader_p_' . $ResultsTr->program_id . '&id='.$_GET['id'].'" data-toggle="modal" data-target="#Modal" class="btn btn-primary btn-xs">
+                                                Рубрика';
+
+                                        if( $resRubric->decision == 'Незачет'){
+                                            $rubric .= $rubriclink2 . "<br>модератора</a>";
+                                        }
+
+                                    }
 
 
 
@@ -856,10 +875,10 @@ foreach ($linksGroup as $link) {
                             <?php
                             $q = 0;
                             foreach ( $wpdb->get_results( $wpdb->prepare("SELECT a.id, a.user_id, b.surname, b.name u_name, b.patronymic, a.group_id,  c.surname f_surname , c.name f_name, c.patronymic f_patronymic, a.date_create, a.appointed_user_id, a.link
-FROM p_appointed7 a
-LEFT JOIN p_user_fields b ON a.user_id = b.user_id 
-LEFT JOIN p_user_fields c ON a.appointed_user_id = c.user_id 
-WHERE a.group_id = %d", $_GET['id'])  ) as $result) {
+                                    FROM p_appointed7 a
+                                    LEFT JOIN p_user_fields b ON a.user_id = b.user_id 
+                                    LEFT JOIN p_user_fields c ON a.appointed_user_id = c.user_id 
+                                    WHERE a.group_id = %d", $_GET['id'])  ) as $result) {
                                 $q++;
                                 if ( $result->appointed_user_id == $ResultsTr->independent_trainer_id ){
                                     $role = "Независимый тренер";

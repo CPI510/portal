@@ -88,9 +88,10 @@ if($_POST['fileuserdata']) {
         $res = $wpdb->get_row($s=$wpdb->prepare("SELECT * FROM  p_proforma_user_result WHERE group_id = %d AND user_id = %d AND expert_id = %d", $_GET['id'], $_POST['fileuserdata'], get_current_user_id()));
         $field_name = 'expert_id';
     }elseif(get_current_user_id() == $groupInfo->moderator_id){
-        $res = $wpdb->get_row($s=$wpdb->prepare("SELECT * FROM  p_proforma_user_result WHERE group_id = %d AND user_id = %d", $_GET['id'], $_POST['fileuserdata']));
+        $res = $wpdb->get_row($s=$wpdb->prepare("SELECT * FROM  p_proforma_user_result WHERE group_id = %d AND user_id = %d AND moderator_id = %d", $_GET['id'], $_POST['fileuserdata'], get_current_user_id()));
         $res->id = "";
         $field_name = 'moderator_id';
+        $expertReview = $wpdb->get_row($s=$wpdb->prepare("SELECT * FROM  p_proforma_user_result WHERE group_id = %d AND user_id = %d AND expert_id = %d", $_GET['id'], $_POST['fileuserdata'], $groupInfo->expert_id));
     }
 
     ?>
@@ -102,7 +103,7 @@ if($_POST['fileuserdata']) {
     </h3>
 
     <div class="card">
-        <?php if(isset($res) && !empty($res->id )):?>
+        <?php if(isset($res)):?>
 
             <?php if(!empty($res->review)) : ?>
                 <a href="/export_to_word/?form=<?= $res->proforma_id?>_review&group=<?= $res->group_id ?>&user_id=<?= $res->user_id?>" class="btn btn-primary"><?= ASSESSMENT_SECOND[0] ?> </a>
@@ -208,7 +209,7 @@ if($_POST['fileuserdata']) {
                                         if($user->data_value == 3){
                                             echo 'Плагиат';
                                         } elseif($user->data_value == -1){
-                                             echo 'Плагиат';
+                                             echo 'Неявка';
                                         } else {
                                             echo $user->data_value;
                                         }
@@ -225,6 +226,22 @@ if($_POST['fileuserdata']) {
         </form>
     </div>
 
+    <?php if(get_current_user_id() == $groupInfo->moderator_id) : ?>
+        <div class="card">
+            <div class="card-body">
+                <h4><?= EXPERT_RATIONALE ?></h4>
+                <div class="form-group">
+                    <label for="textarea3"></label>
+                    <div name="expert_review" id="textarea4" class="form-control">
+                        <?= $expertReview->review ?>
+                    </div>
+                </div>
+
+            </div><!--end .card-body -->
+        </div><!--end .card -->
+    <?php endif; ?>
+
+
 
     <div class="card">
         <div class="card-body">
@@ -237,6 +254,8 @@ if($_POST['fileuserdata']) {
         </div><!--end .card-body -->
 
     </div><!--end .card -->
+
+
 
 
 
